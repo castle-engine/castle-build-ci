@@ -129,6 +129,12 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y git
 
+            # GITHUB_ENV is defined now, but invalid, it refers to filename
+            # inside ubuntu-latest runner which doesn't exist inside ARM runner.
+            # Unset it, to prevent using by setup_castle_engine_env.sh .
+            # TODO: test warning, uncomment this
+            #unset GITHUB_ENV
+
             # get and run setup_castle_engine
             git clone https://github.com/castle-engine/castle-build-ci.git \
               --depth=1 --single-branch --branch=master

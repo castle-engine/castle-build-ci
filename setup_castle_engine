@@ -54,10 +54,13 @@ preserve_variable_for_future_ci_steps()
   shift 1
 
   if [ -n "${GITHUB_ENV:-}" ] ; then
-    # preserve new environment variables for later GHA steps following
-    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
-    # https://brandur.org/fragments/github-actions-env-vars-in-env-vars
-    echo "$VAR=${!VAR}" >> "${GITHUB_ENV}"
+    if [ -d "`dirname \"${GITHUB_ENV}\"`" ] ; then
+      echo "$VAR=${!VAR}" >> "${GITHUB_ENV}"
+    else
+      echo "Warning: GITHUB_ENV is defined (${GITHUB_ENV}), but the directory it points to doesn't exist."
+      echo "  Possible reason: you are within GitHub Actions job and use pguyot/arm-runner-action, where GITHUB_ENV refers to outer machine (like ubuntu-latest), not the ARM runner machine."
+      echo "  Ignoring GITHUB_ENV."
+    fi
   fi
 
   # Add export and surround with ', to allow "source setup_castle_engine_env.sh" reliably
