@@ -55,8 +55,7 @@ jobs:
           # TODO: test
           echo GITHUB_ENV is $GITHUB_ENV
           cat $GITHUB_ENV
-          IFS=$'\n\t'
-          source $GITHUB_ENV
+          source setup_castle_engine_env.sh
           export PATH
           which fpc
           fpc -iV

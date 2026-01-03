@@ -15,7 +15,8 @@ set -euo pipefail
 #
 # After this is called, calling "castle-engine package" will package your project.
 # It enhances the PATH variable to include FPC and CGE build tool
-# by enhancing $GITHUB_ENV.
+# by enhancing file $GITHUB_ENV (if defined) and setup_castle_engine_env.sh
+# (the latter useful for non-GitHub Action CI).
 #
 # Details what it does:
 #
@@ -38,13 +39,30 @@ OS=$1
 CPU=$2
 shift 2
 
-
 #CASTLE_ENGINE_VERSION='snapshot'
 # TODO: just a test while LSOpenCFURLRef is in the process of being tested
 CASTLE_ENGINE_VERSION='master'
 
 # ----------------------------------------------------------------------------
 # bash functions
+
+# Preserve variable named $1 for future CI steps.
+# Uses $GITHUB_ENV (if defined, in GitHub Actions) and to setup_castle_engine_env.sh.
+preserve_variable_for_future_ci_steps()
+{
+  VAR=$1
+  shift 1
+
+  if [ -n "${GITHUB_ENV:-}" ] ; then
+    # preserve new environment variables for later GHA steps following
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # https://brandur.org/fragments/github-actions-env-vars-in-env-vars
+    echo "$VAR=${VAR}" >> "${GITHUB_ENV}"
+  fi
+
+  # Add export and surround with ', to allow "source setup_castle_engine_env.sh" reliably
+  echo "export $VAR='${VAR}'" >> "${DEFINES_FILE}"
+}
 
 # Determine variables used in the rest of the script.
 do_setup_environment()
@@ -58,6 +76,15 @@ do_setup_environment()
   if which cygpath > /dev/null; then
     WORKSPACE_ROOT="`cygpath --mixed \"${WORKSPACE_ROOT}\"`"
   fi
+
+  DEFINES_FILE="${WORKSPACE_ROOT}/setup_castle_engine_env.sh"
+}
+
+# Just in case, enable multiple runs of this script, by cleaning up
+# at the beginning.
+do_cleanup()
+{
+  rm -Rf fpc/ castle-engine/ "${DEFINES_FILE}"
 }
 
 # Get FPC from castle-fpc
@@ -80,7 +107,7 @@ do_get_fpc()
   # fpc.cfg (so e.g. we don't touch ~/.fpc.cfg on user's machine).
 
   export PPC_CONFIG_PATH="${WORKSPACE_ROOT}/fpc"
-  echo "PPC_CONFIG_PATH=${PPC_CONFIG_PATH}" >> $GITHUB_ENV
+  preserve_variable_for_future_ci_steps PPC_CONFIG_PATH
   FPC_CFG="${PPC_CONFIG_PATH}/fpc.cfg"
 
   # Define fpc.cfg following https://github.com/castle-engine/castle-fpc docs
@@ -116,7 +143,7 @@ do_get_fpc()
   echo "==================================================================="
 
   export PATH="${WORKSPACE_ROOT_UNIX}/fpc/bin:${PATH}"
-  echo "PATH=$PATH" >> $GITHUB_ENV # preserve new PATH for later GHA steps
+  preserve_variable_for_future_ci_steps PATH
 
   echo "FPC version info:"
   fpc -iV # version
@@ -134,11 +161,8 @@ do_get_castle_engine()
   # to separate multiple entries in PATH).
   export PATH="${WORKSPACE_ROOT_UNIX}/castle-engine/tools/build-tool/:${PATH}"
 
-  # preserve new environment variables for later GHA steps following
-  # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
-  # https://brandur.org/fragments/github-actions-env-vars-in-env-vars
-  echo "CASTLE_ENGINE_PATH=$CASTLE_ENGINE_PATH" >> $GITHUB_ENV
-  echo "PATH=$PATH" >> $GITHUB_ENV
+  preserve_variable_for_future_ci_steps CASTLE_ENGINE_PATH
+  preserve_variable_for_future_ci_steps PATH
 
   git clone --depth 1 --single-branch \
     --branch "${CASTLE_ENGINE_VERSION}" \
@@ -152,5 +176,6 @@ do_get_castle_engine()
 # main: call functions
 
 do_setup_environment
+do_cleanup
 do_get_fpc
 do_get_castle_engine

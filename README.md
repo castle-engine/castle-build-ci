@@ -66,23 +66,19 @@ More complete example in the workflow within this repo, which is our own test: [
 
 ## Environment variables and usage outside of GitHub Actions
 
-The script defines a few environment variables which should "survive" to the next steps. It is done following [GitHub Actions conventions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files), so it writes the variables to `$GITHUB_ENV`.
+The script defines a few environment variables which should "survive" to the next steps.
 
-To use this script outside of _GitHub Actions_, just
-- define `GITHUB_ENV` to point to some writeable file location.
-- `source $GITHUB_ENV` in the next steps to load the variables and `export ...` them to be available for future processes.
+- The variable definitions are written to `setup_castle_engine_env.sh`, which is a bash script that you can `source` to load the variables.
+
+- We also write variables following [GitHub Actions conventions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files) to `$GITHUB_ENV`.
+
+To use this script outside of _GitHub Actions_, just do `source setup_castle_engine_env.sh` to load the variables after running `setup_castle_engine`. You can redo this in all future steps to have the variables available.
 
 Like this:
 
 ```shell
-GITHUB_ENV=environment.txt
-
 castle-build-ci/setup_castle_engine ...
-
-source $GITHUB_ENV
-export PATH
-export PPC_CONFIG_PATH
-export CASTLE_ENGINE_PATH
+source setup_castle_engine_env.sh
 ```
 
 ## Alternatives to setup FPC and CGE in CI/CD
