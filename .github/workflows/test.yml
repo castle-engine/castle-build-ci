@@ -13,7 +13,7 @@ defaults:
 jobs:
   # Build on regular desktop platforms for which we have GitHub-hosted runners.
   build:
-    name: Build Project using castle-build-ci
+    name: Build
     strategy:
       matrix:
         runner: [
@@ -45,6 +45,13 @@ jobs:
           # repos castle-engine/ and fpc/ which we will also place in
           # $GITHUB_WORKSPACE.
           path: app/
+
+      - name: Install dependencies
+        if: ${{ matrix.runner == 'ubuntu-latest' }}
+        run: sudo apt-get update && sudo apt-get install wget
+      - name: Install dependencies
+        if: ${{ matrix.runner == 'windows-latest' }}
+        run: choco install wget
 
       - name: Setup Castle Game Engine
         run: |
