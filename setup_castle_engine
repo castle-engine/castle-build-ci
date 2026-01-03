@@ -66,7 +66,7 @@ do_get_fpc()
   # on Unix, fpc/bin/ on Windows) and that doesn't mess with any user/system-wide
   # fpc.cfg (so e.g. we don't touch ~/.fpc.cfg on user's machine).
 
-  PPC_CONFIG_PATH="${WORKSPACE_ROOT}/fpc"
+  export PPC_CONFIG_PATH="${WORKSPACE_ROOT}/fpc"
   echo "PPC_CONFIG_PATH=${PPC_CONFIG_PATH}" >> $GITHUB_ENV
   FPC_CFG="${PPC_CONFIG_PATH}/fpc.cfg"
 
