@@ -8,18 +8,18 @@ set -euo pipefail
 # every time the workflow is performed).
 # ------------------------------------------------------------------
 
-if which apt-get > /dev/null; then
+if which apt-get > /dev/null 2>&1; then
   echo "Installing Linux dependencies"
   sudo apt-get update
   sudo apt-get install -y wget libgtk2.0-dev
 fi
 
-if which choco > /dev/null; then
+if which choco > /dev/null 2>&1; then
   echo "Installing Windows dependencies"
   choco install wget
 fi
 
-if which brew > /dev/null; then
+if which brew > /dev/null 2>&1; then
   echo "Installing macOS dependencies"
   # No need, wget is already installed on macOS runners.
   # brew install wget
