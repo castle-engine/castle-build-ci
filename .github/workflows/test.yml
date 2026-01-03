@@ -55,6 +55,7 @@ jobs:
           # TODO: test
           echo GITHUB_ENV is $GITHUB_ENV
           cat $GITHUB_ENV
+          IFS=$'\n\t'
           source $GITHUB_ENV
           export PATH
           which fpc
