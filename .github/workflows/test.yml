@@ -53,11 +53,22 @@ jobs:
           castle-build-ci/install_dependencies_github_hosted_runner
           castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
-      - name: TODO temp test
-        run: |
+          # TODO debugging
+          echo PATH from same step
+          echo $PATH
+          echo '====================================='
+          cat setup_castle_engine_env.sh
+          echo '====================================='
           cd app/
           fpc temp_test.lpr
           ./temp_test
+
+      # TODO debugging
+      - name: TODO temp test
+        run: |
+          echo PATH from different step
+          echo $PATH
+          app/temp_test
 
       - name: Package
         run: cd app/test_project && castle-engine package --verbose
