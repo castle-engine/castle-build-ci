@@ -46,17 +46,11 @@ jobs:
           # $GITHUB_WORKSPACE.
           path: app/
 
-      - name: Install dependencies
-        if: ${{ matrix.runner == 'ubuntu-latest' }}
-        run: sudo apt-get update && sudo apt-get install wget
-      - name: Install dependencies
-        if: ${{ matrix.runner == 'windows-latest' }}
-        run: choco install wget
-
       - name: Setup Castle Game Engine
         run: |
           git clone https://github.com/castle-engine/castle-build-ci.git \
             --depth=1 --single-branch --branch=master
+          castle-build-ci/install_dependencies_github_hosted_runner
           castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
       - name: Package
@@ -122,6 +116,7 @@ jobs:
             git clone https://github.com/castle-engine/castle-build-ci.git \
               --depth=1 --single-branch --branch=master
             GITHUB_ENV=environment.txt
+            castle-build-ci/install_dependencies_github_hosted_runner
             castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
             source $GITHUB_ENV
 
