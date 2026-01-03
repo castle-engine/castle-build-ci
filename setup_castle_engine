@@ -38,7 +38,6 @@ OS=$1
 CPU=$2
 shift 2
 
-WORKSPACE_ROOT="`pwd`"
 
 #CASTLE_ENGINE_VERSION='snapshot'
 # TODO: just a test while LSOpenCFURLRef is in the process of being tested
@@ -46,6 +45,20 @@ CASTLE_ENGINE_VERSION='master'
 
 # ----------------------------------------------------------------------------
 # bash functions
+
+# Determine variables used in the rest of the script.
+do_setup_environment()
+{
+  # calculate WORKSPACE_ROOT and WORKSPACE_ROOT_UNIX.
+  # On Windows they differ:
+  # - WORKSPACE_ROOT_UNIX is in Cygwin path format (with /, without :, more suitable for $PATH)
+  # - WORKSPACE_ROOT is in native (on Windows) path format, understood also by non-Msys2/Cygwin tools
+  WORKSPACE_ROOT_UNIX="`pwd`"
+  WORKSPACE_ROOT="${WORKSPACE_ROOT_UNIX}"
+  if which cygpath > /dev/null; then
+    WORKSPACE_ROOT="`cygpath --mixed \"${WORKSPACE_ROOT}\"`"
+  fi
+}
 
 # Get FPC from castle-fpc
 do_get_fpc()
@@ -102,7 +115,7 @@ do_get_fpc()
   cat "${FPC_CFG}"
   echo "==================================================================="
 
-  export PATH="${WORKSPACE_ROOT}/fpc/bin:${PATH}"
+  export PATH="${WORKSPACE_ROOT_UNIX}/fpc/bin:${PATH}"
   echo "PATH=$PATH" >> $GITHUB_ENV # preserve new PATH for later GHA steps
 
   echo "FPC version info:"
@@ -134,5 +147,6 @@ do_get_castle_engine()
 # ----------------------------------------------------------------------------
 # main: call functions
 
+do_setup_environment
 do_get_fpc
 do_get_castle_engine
