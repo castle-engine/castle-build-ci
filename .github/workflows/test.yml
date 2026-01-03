@@ -59,6 +59,11 @@ jobs:
           echo '====================================='
           cat setup_castle_engine_env.sh
           echo '====================================='
+
+          source setup_castle_engine_env.sh
+          echo PATH from same step after source
+          echo $PATH
+
           cd app/
           fpc temp_test.lpr
           ./temp_test
