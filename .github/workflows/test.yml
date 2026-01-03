@@ -52,21 +52,14 @@ jobs:
             --depth=1 --single-branch --branch=master
           castle-build-ci/install_dependencies_github_hosted_runner
           castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
-          # TODO: test
-          echo GITHUB_ENV is $GITHUB_ENV
-          cat $GITHUB_ENV
-          source setup_castle_engine_env.sh
-          export PATH
-          which fpc
-          fpc -iV
+
+      - name: TODO temp test
+        run: |
+          fpc temp_test.lpr
+          ./temp_test
 
       - name: Package
-        run: |
-          # TODO: test
-          echo which fpc
-          which fpc
-          fpc -iV
-          cd app/test_project && castle-engine package --verbose
+        run: cd app/test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
