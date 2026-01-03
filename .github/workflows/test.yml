@@ -46,6 +46,14 @@ jobs:
           # $GITHUB_WORKSPACE.
           path: app/
 
+      # TODO: debugging PATH issues
+      - name: Disable broken MSys2 paths conversion
+        if: ${{ matrix.runner == 'windows-latest' }}
+        run: echo "MSYS2_ENV_CONV_EXCL='*'" >> $GITHUB_ENV
+      - name: Disable broken Git For Windows MSys paths conversion
+        if: ${{ matrix.runner == 'windows-latest' }}
+        run: echo "MSYS_NO_PATHCONV=1" >> $GITHUB_ENV
+
       - name: Setup Castle Game Engine
         run: |
           git clone https://github.com/castle-engine/castle-build-ci.git \
