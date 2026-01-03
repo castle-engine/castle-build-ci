@@ -57,11 +57,11 @@ preserve_variable_for_future_ci_steps()
     # preserve new environment variables for later GHA steps following
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
     # https://brandur.org/fragments/github-actions-env-vars-in-env-vars
-    echo "$VAR=${VAR}" >> "${GITHUB_ENV}"
+    echo "$VAR=${!VAR}" >> "${GITHUB_ENV}"
   fi
 
   # Add export and surround with ', to allow "source setup_castle_engine_env.sh" reliably
-  echo "export $VAR='${VAR}'" >> "${DEFINES_FILE}"
+  echo "export $VAR='${!VAR}'" >> "${DEFINES_FILE}"
 }
 
 # Determine variables used in the rest of the script.
