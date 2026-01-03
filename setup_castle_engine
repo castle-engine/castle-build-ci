@@ -115,7 +115,7 @@ do_get_fpc()
 
   # Define fpc.cfg following https://github.com/castle-engine/castle-fpc docs
   echo '# Minimal fpc.cfg for FPC from https://github.com/castle-engine/castle-fpc' > "${FPC_CFG}"
-  echo "-Fu${WORKSPACE_ROOT}/fpc/units/${CPU}-${OS}/*" >> "${FPC_CFG}"
+  echo "-Fu${WORKSPACE_ROOT}/fpc/units/\$FPCTARGET/*" >> "${FPC_CFG}"
 
   # Add macOS specific flags, see castle-fpc/README.md for reasons.
   # Otherwise, linking on newer macOS versions fails.
