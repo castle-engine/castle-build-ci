@@ -128,7 +128,11 @@ do_get_fpc()
 do_get_castle_engine()
 {
   export CASTLE_ENGINE_PATH="${WORKSPACE_ROOT}/castle-engine"
-  export PATH="${CASTLE_ENGINE_PATH}/tools/build-tool/:${PATH}"
+  # Note that below we needto use WORKSPACE_ROOT_UNIX, not WORKSPACE_ROOT,
+  # which is important on Windows: inside Msys2/Cygwin, we need to use
+  # Unix path format (with /, without : for drive separator, as : is used
+  # to separate multiple entries in PATH).
+  export PATH="${WORKSPACE_ROOT_UNIX}/castle-engine/tools/build-tool/:${PATH}"
 
   # preserve new environment variables for later GHA steps following
   # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
