@@ -55,6 +55,7 @@ jobs:
 
       - name: TODO temp test
         run: |
+          cd app/
           fpc temp_test.lpr
           ./temp_test
 
