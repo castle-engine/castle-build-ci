@@ -121,14 +121,14 @@ jobs:
             source $GITHUB_ENV
 
             # build application
-            cd app/ && castle-engine package --verbose
+            cd app/test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-arm-${{ matrix.arch }}
           path: |
-            app/*.zip
-            app/*.tar.gz
-            app/*.apk
+            app/test_project/*.zip
+            app/test_project/*.tar.gz
+            app/test_project/*.apk
           if-no-files-found: error
