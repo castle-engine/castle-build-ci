@@ -127,13 +127,9 @@ jobs:
             # get and run setup_castle_engine
             git clone https://github.com/castle-engine/castle-build-ci.git \
               --depth=1 --single-branch --branch=master
-            export GITHUB_ENV=environment.txt
             castle-build-ci/install_dependencies_github_hosted_runner
             castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
-            source $GITHUB_ENV
-            export PATH
-            export PPC_CONFIG_PATH
-            export CASTLE_ENGINE_PATH
+            source setup_castle_engine_env.sh
 
             # build application
             cd app/test_project && castle-engine package --verbose
