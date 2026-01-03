@@ -70,7 +70,20 @@ The script defines a few environment variables which should "survive" to the nex
 
 To use this script outside of _GitHub Actions_, just
 - define `GITHUB_ENV` to point to some writeable file location.
-- `source $GITHUB_ENV` in the next steps to load the variables.
+- `source $GITHUB_ENV` in the next steps to load the variables and `export ...` them to be available for future processes.
+
+Like this:
+
+```shell
+GITHUB_ENV=environment.txt
+
+castle-build-ci/setup_castle_engine ...
+
+source $GITHUB_ENV
+export PATH
+export PPC_CONFIG_PATH
+export CASTLE_ENGINE_PATH
+```
 
 ## Alternatives to setup FPC and CGE in CI/CD
 
