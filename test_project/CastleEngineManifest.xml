@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Specify basic information about the project, including how this project is build.
+See https://castle-engine.io/project_manifest for documentation of this file.
+-->
+
+<project name="test_project"
+  game_units="GameInitialize"
+  qualified_name="io.castleengine.test.project"
+  caption="Test Project for castle-build-ci"
+>
+  <compiler_options>
+    <search_paths>
+      <path value="code/" />
+    </search_paths>
+  </compiler_options>
+</project>

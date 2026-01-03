@@ -60,16 +60,16 @@ jobs:
           castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
       - name: Package
-        run: cd app/ && castle-engine package --verbose
+        run: cd app/test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-${{ matrix.runner }}
           path: |
-            app/*.zip
-            app/*.tar.gz
-            app/*.apk
+            app/test_project/*.zip
+            app/test_project/*.tar.gz
+            app/test_project/*.apk
           if-no-files-found: error
 
   # Build on ARM runners (for Raspberry Pi) using pguyot/arm-runner-action .

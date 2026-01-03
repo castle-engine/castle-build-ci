@@ -51,6 +51,13 @@ jobs:
           # $GITHUB_WORKSPACE.
           path: app/
 
+      - name: Install dependencies
+        if: ${{ matrix.runner == 'ubuntu-latest' }}
+        run: sudo apt-get update && sudo apt-get install wget
+      - name: Install dependencies
+        if: ${{ matrix.runner == 'windows-latest' }}
+        run: choco install wget
+
       - name: Setup Castle Game Engine
         run: |
           git clone https://github.com/castle-engine/castle-build-ci.git \
@@ -58,7 +65,7 @@ jobs:
           castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
       - name: Package
-        run: cd app/ && castle-engine package --verbose
+        run: cd app && castle-engine package --verbose
 ```
 
 More complete example in the workflow within this repo, which is our own test: [.github/workflows/test.yml](.github/workflows/test.yml).
