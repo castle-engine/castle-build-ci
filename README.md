@@ -84,7 +84,7 @@ There are 2 practical conclusions:
 
     ```shell
     castle-build-ci/setup_castle_engine ...
-    source setup_castle_engine_env.sh
+    source castle-build-ci/setup_castle_engine_env.sh
     ```
 
 - To use this script outside of _GitHub Actions_, do `source setup_castle_engine_env.sh` to load the variables at the beginning of all future steps to have the variables available.
