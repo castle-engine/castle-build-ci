@@ -12,10 +12,18 @@ set -euo pipefail
 
 if which apt-get > /dev/null 2>&1; then
   echo "Installing Linux dependencies"
-  sudo apt-get update
+
+  # On GitLab CI, execute without sudo.
+  if which sudo > /dev/null 2>&1; then
+    SUDO=sudo
+  else
+    SUDO=
+  fi
+
+  $SUDO apt-get update
   # See https://castle-engine.io/compiling_from_source.php behind
   # some of the dependencies like libgtk2.0-dev .
-  sudo apt-get install -y wget libgtk2.0-dev
+  $SUDO apt-get install -y wget libgtk2.0-dev
 fi
 
 if which choco > /dev/null 2>&1; then
