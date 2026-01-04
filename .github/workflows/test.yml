@@ -59,7 +59,9 @@ jobs:
           echo $PATH
 
           cd app/
-          fpc temp_test.lpr
+          #fpc temp_test.lpr
+          # made exe by
+          # castle-engine simple-compile temp_test.lpr  --os=win64 --cpu=x86_64
           ./temp_test
 
       # TODO debugging

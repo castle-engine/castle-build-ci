@@ -16,7 +16,7 @@ fi
 
 if which choco > /dev/null 2>&1; then
   echo "Installing Windows dependencies"
-  choco install wget
+  #choco install wget
 fi
 
 if which brew > /dev/null 2>&1; then
