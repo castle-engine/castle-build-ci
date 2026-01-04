@@ -70,16 +70,24 @@ The script defines a few environment variables which should "survive" to the nex
 
 - The variable definitions are written to `setup_castle_engine_env.sh`, which is a bash script that you can `source` to load the variables.
 
-- We also write variables following [GitHub Actions conventions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files) to `$GITHUB_ENV`.
+- We also write variables (except `PATH`) following [GitHub Actions conventions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files) to `$GITHUB_ENV`.
 
-To use this script outside of _GitHub Actions_, just do `source setup_castle_engine_env.sh` to load the variables after running `setup_castle_engine`. You can redo this in all future steps to have the variables available.
+- We also write path extensions to `$GITHUB_PATH`. See [github_actions_prepend_path.md](github_actions_prepend_path.md) for more information.
 
-Like this:
+There are 2 practical conclusions:
 
-```shell
-castle-build-ci/setup_castle_engine ...
-source setup_castle_engine_env.sh
-```
+- If you want to rely on new environment variables within the _same CI step_, you need to `source setup_castle_engine_env.sh` after running `setup_castle_engine`.
+
+    This goes for both usage in GitHub Actions and in other CI systems.
+
+    Like this:
+
+    ```shell
+    castle-build-ci/setup_castle_engine ...
+    source setup_castle_engine_env.sh
+    ```
+
+- To use this script outside of _GitHub Actions_, do `source setup_castle_engine_env.sh` to load the variables at the beginning of all future steps to have the variables available.
 
 ## Alternatives to setup FPC and CGE in CI/CD
 
