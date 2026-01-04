@@ -84,7 +84,7 @@ prepend_to_path()
   export PATH="${DIR_UNIX}:${PATH}"
 
   # extend setup_castle_engine_env.sh
-  echo "export PATH='${!PATH}'" >> "${DEFINES_FILE}"
+  echo "export PATH=\"${PATH}\"" >> "${DEFINES_FILE}"
 
   # extend GITHUB_PATH, if GITHUB_PATH defined and valid.
   # Following https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-system-path
