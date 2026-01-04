@@ -44,17 +44,10 @@ jobs:
 
       - name: Setup Castle Game Engine
         run: |
-          app/install_dependencies_github_hosted_runner
           app/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
-          # TODO debugging
-          echo PATH from same step
-          echo $PATH
-          echo '====================================='
-          cat setup_castle_engine_env.sh
-          echo '====================================='
+          echo "PATH=$PATH" >> $GITHUB_ENV
 
-          source setup_castle_engine_env.sh
           echo PATH from same step after source
           echo $PATH
 
