@@ -71,16 +71,3 @@ jobs:
           echo $PATH
           app/temp_test
 
-      - name: Package
-        run: cd app/test_project && castle-engine package --verbose
-
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: build-${{ matrix.runner }}
-          path: |
-            app/test_project/*.zip
-            app/test_project/*.tar.gz
-            app/test_project/*.apk
-          if-no-files-found: error
-
