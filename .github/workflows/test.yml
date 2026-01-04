@@ -42,25 +42,15 @@ jobs:
         if: ${{ matrix.runner == 'windows-latest' }}
         run: echo "MSYS_NO_PATHCONV=1" >> $GITHUB_ENV
 
-      - name: Setup Castle Game Engine
+      - name: Break PATH?
+        run: echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Test is PATH broken in next step
         run: |
-          app/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
-
-          echo "PATH=$PATH" >> $GITHUB_ENV
-
-          echo PATH from same step after source
+          echo ---------------------------------------
+          echo PATH in a different step, as seen from bash:
           echo $PATH
-
-          cd app/
-          #fpc temp_test.lpr
-          # made exe by
-          # castle-engine simple-compile temp_test.lpr  --os=win64 --cpu=x86_64
-          ./temp_test
-
-      # TODO debugging
-      - name: TODO temp test
-        run: |
-          echo PATH from different step
-          echo $PATH
+          echo ---------------------------------------
+          echo PATH in a different step, as seen from Windows native application:
           app/temp_test
 
