@@ -17,23 +17,11 @@ jobs:
     strategy:
       matrix:
         runner: [
-          ubuntu-latest,
-          windows-latest,
-          macos-latest, # macOS with Aarch64 (macOS Silicon)
-          macos-15-intel # last macOS with Intel
+          windows-latest
         ]
         include:
-          - runner: ubuntu-latest
-            build_os: linux
-            build_cpu: x86_64
           - runner: windows-latest
             build_os: win64
-            build_cpu: x86_64
-          - runner: macos-latest
-            build_os: darwin
-            build_cpu: aarch64
-          - runner: macos-15-intel
-            build_os: darwin
             build_cpu: x86_64
     runs-on: ${{ matrix.runner }}
     steps:
@@ -56,10 +44,8 @@ jobs:
 
       - name: Setup Castle Game Engine
         run: |
-          git clone https://github.com/castle-engine/castle-build-ci.git \
-            --depth=1 --single-branch --branch=master
-          castle-build-ci/install_dependencies_github_hosted_runner
-          castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
+          app/install_dependencies_github_hosted_runner
+          app/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
 
           # TODO debugging
           echo PATH from same step
@@ -96,73 +82,3 @@ jobs:
             app/test_project/*.apk
           if-no-files-found: error
 
-  # Build on ARM runners (for Raspberry Pi) using pguyot/arm-runner-action .
-  build_arm_runner:
-    name: Build on ARM Runner (for Raspberry Pi)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [raspberry-pi-32, raspberry-pi-64]
-        include:
-
-        # additional defines for Raspberry Pi 32-bit (Arm)
-        - arch: raspberry-pi-32
-          # Arguments for pguyot/arm-runner-action
-          cpu: cortex-a7
-          base_image: raspios_lite:latest
-          # Arguments for build_lazarus script.
-          build_os: linux
-          build_cpu: arm
-
-        # additional defines for Raspberry Pi 64-bit (Aarch64)
-        - arch: raspberry-pi-64
-          # Arguments for pguyot/arm-runner-action
-          cpu: cortex-a53
-          base_image: raspios_lite_arm64:latest
-          # Arguments for build_lazarus script.
-          build_os: linux
-          build_cpu: aarch64
-
-    steps:
-      - name: Checkout app
-        uses: actions/checkout@v6
-        with:
-          path: app/
-
-      - uses: pguyot/arm-runner-action@v2
-        with:
-          base_image: ${{ matrix.base_image }}
-          cpu: ${{ matrix.cpu }}
-          shell: /bin/bash -eo pipefail
-          image_additional_mb: 6000
-          # Avoids the need for copy_artifact_path later.
-          bind_mount_repository: true
-          commands: |
-            # get git
-            sudo apt-get update
-            sudo apt-get install -y git
-
-            # GITHUB_ENV is defined now, but invalid, it refers to filename
-            # inside ubuntu-latest runner which doesn't exist inside ARM runner.
-            # Unset it, to prevent using by setup_castle_engine_env.sh .
-            unset GITHUB_ENV
-
-            # get and run setup_castle_engine
-            git clone https://github.com/castle-engine/castle-build-ci.git \
-              --depth=1 --single-branch --branch=master
-            castle-build-ci/install_dependencies_github_hosted_runner
-            castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
-            source setup_castle_engine_env.sh
-
-            # build application
-            cd app/test_project && castle-engine package --verbose
-
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: build-arm-${{ matrix.arch }}
-          path: |
-            app/test_project/*.zip
-            app/test_project/*.tar.gz
-            app/test_project/*.apk
-          if-no-files-found: error
