@@ -2,8 +2,10 @@
 set -euo pipefail
 
 # ------------------------------------------------------------------
-# Install dependencies of setup_castle_engine specific to GitHub-hosted runner.
-# Execute this only on GH-hosted ephemeral runner where you have
+# Install dependencies of setup_castle_engine specific
+# in a GitHub-hosted or GitLab-hosted runner.
+#
+# Execute this only on GitHub/GitLab-hosted ephemeral runner where you have
 # root permissions to install packages (and you should install them
 # every time the workflow is performed).
 # ------------------------------------------------------------------
@@ -11,6 +13,8 @@ set -euo pipefail
 if which apt-get > /dev/null 2>&1; then
   echo "Installing Linux dependencies"
   sudo apt-get update
+  # See https://castle-engine.io/compiling_from_source.php behind
+  # some of the dependencies like libgtk2.0-dev .
   sudo apt-get install -y wget libgtk2.0-dev
 fi
 
