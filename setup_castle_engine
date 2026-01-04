@@ -126,7 +126,9 @@ do_get_castle_engine()
 # ----------------------------------------------------------------------------
 # main: call functions
 
-do_setup_environment
-do_cleanup
-do_get_fpc
-do_get_castle_engine
+# do_setup_environment
+# do_cleanup
+# do_get_fpc
+# do_get_castle_engine
+
+preserve_variable_for_future_ci_steps PATH
