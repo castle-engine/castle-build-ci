@@ -67,6 +67,38 @@ preserve_variable_for_future_ci_steps()
   echo "export $VAR='${!VAR}'" >> "${DEFINES_FILE}"
 }
 
+# Prepend path to $PATH for this script and future CI steps.
+# For Windows, DIR should be in native format (with : for drive separator).
+prepend_to_path()
+{
+  DIR=$1
+  shift 1
+
+  if which cygpath > /dev/null 2>&1; then
+    DIR_UNIX="`cygpath --unix \"${DIR}\"`"
+  else
+    DIR_UNIX="${DIR}"
+  fi
+
+  # change current shell
+  export PATH="${DIR_UNIX}:${PATH}"
+
+  # extend setup_castle_engine_env.sh
+  echo "export PATH='${!PATH}'" >> "${DEFINES_FILE}"
+
+  # extend GITHUB_PATH, if GITHUB_PATH defined and valid.
+  # Following https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-system-path
+  if [ -n "${GITHUB_ENV:-}" ] ; then
+    if [ -d "`dirname \"${GITHUB_ENV}\"`" ] ; then
+      echo "${DIR}" >> $GITHUB_PATH
+    fi
+  fi
+
+  # Never do this:
+  # preserve_variable_for_future_ci_steps PATH
+  # See github_actions_prepend_path.md for explanation.
+}
+
 # Determine variables used in the rest of the script.
 do_setup_environment()
 {
@@ -145,8 +177,7 @@ do_get_fpc()
   cat "${FPC_CFG}"
   echo "==================================================================="
 
-  export PATH="${WORKSPACE_ROOT_UNIX}/fpc/bin:${PATH}"
-  preserve_variable_for_future_ci_steps PATH
+  prepend_to_path "${WORKSPACE_ROOT}/fpc/bin"
 
   echo "FPC version info:"
   fpc -iV # version
@@ -158,14 +189,9 @@ do_get_fpc()
 do_get_castle_engine()
 {
   export CASTLE_ENGINE_PATH="${WORKSPACE_ROOT}/castle-engine"
-  # Note that below we needto use WORKSPACE_ROOT_UNIX, not WORKSPACE_ROOT,
-  # which is important on Windows: inside Msys2/Cygwin, we need to use
-  # Unix path format (with /, without : for drive separator, as : is used
-  # to separate multiple entries in PATH).
-  export PATH="${WORKSPACE_ROOT_UNIX}/castle-engine/tools/build-tool/:${PATH}"
-
   preserve_variable_for_future_ci_steps CASTLE_ENGINE_PATH
-  preserve_variable_for_future_ci_steps PATH
+
+  prepend_to_path "${WORKSPACE_ROOT}/castle-engine/tools/build-tool/"
 
   git clone --depth 1 --single-branch \
     --branch "${CASTLE_ENGINE_VERSION}" \
