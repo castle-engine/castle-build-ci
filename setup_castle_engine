@@ -105,7 +105,7 @@ do_get_fpc()
   preserve_variable_for_future_ci_steps PPC_CONFIG_PATH
   FPC_CFG="${PPC_CONFIG_PATH}/fpc.cfg"
 
-  export PATH="${WORKSPACE_ROOT_UNIX}/fpc/bin:${PATH}"
+  # export PATH="${WORKSPACE_ROOT_UNIX}/fpc/bin:${PATH}"
   preserve_variable_for_future_ci_steps PATH
 }
 
@@ -117,7 +117,7 @@ do_get_castle_engine()
   # which is important on Windows: inside Msys2/Cygwin, we need to use
   # Unix path format (with /, without : for drive separator, as : is used
   # to separate multiple entries in PATH).
-  export PATH="${WORKSPACE_ROOT_UNIX}/castle-engine/tools/build-tool/:${PATH}"
+  #export PATH="${WORKSPACE_ROOT_UNIX}/castle-engine/tools/build-tool/:${PATH}"
 
   preserve_variable_for_future_ci_steps CASTLE_ENGINE_PATH
   preserve_variable_for_future_ci_steps PATH
