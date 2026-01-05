@@ -121,7 +121,7 @@ jobs:
       matrix:
         runner: [
           ubuntu-latest,
-          windows-latest
+          windows-latest,
           macos-latest, # macOS with Aarch64 (macOS Silicon)
           macos-15-intel # last macOS with Intel
         ]
