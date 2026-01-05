@@ -270,7 +270,7 @@ do_get_lazarus()
 
   # Setup lazbuild wrapper to pass proper --lazarusdir
   mv lazarus/lazbuild lazarus/lazbuild-real
-  cat <<EOF
+  cat <<EOF > lazarus/lazbuild
 #!/bin/bash
 set -eu
 # Call lazbuild with proper --lazarusdir
