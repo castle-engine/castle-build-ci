@@ -28,7 +28,8 @@ fi
 
 if which choco > /dev/null 2>&1; then
   echo "Installing Windows dependencies"
-  choco install wget
+  # --no-progress avoids too verbose progress output in CI logs.
+  choco --no-progress install wget
 fi
 
 if which brew > /dev/null 2>&1; then
