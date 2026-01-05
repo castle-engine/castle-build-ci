@@ -268,8 +268,37 @@ do_get_lazarus()
     https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip --output-document lazarus.zip
   unzip -q lazarus.zip
 
-  export LAZARUSDIR="${WORKSPACE_ROOT}/lazarus"
-  preserve_variable_for_future_ci_steps LAZARUSDIR
+  # We want to point lazbuild to the Lazarus location.
+  #
+  # - Create wrapper that calls lazbuild with --pcp= ?
+  #   Valid idea, but if the wrapper is shell script, it will not work
+  #   out-of-the-box on Windows where Windows-native applications call lazbuild
+  #   (that would need to call "bash lazbuild-wrapper.sh").
+  #   We could make wrapper in Pascal, but this seems more complicated than it should.
+
+  # - Using LAZARUSDIR?
+  #   Alas, it doesn't work, as our tests show, despite LAZARUSDIR being
+  #   properly defined. Lazarus code uses LAZARUSDIR, but maybe lazbuild
+  #   does not execute that.
+  #
+  #     export LAZARUSDIR="${WORKSPACE_ROOT}/lazarus"
+  #     preserve_variable_for_future_ci_steps LAZARUSDIR
+  #
+  # - Lazarus command-line code has actually code to determine
+  #   lazbuild[.exe] location even on Unix (where ParamStr(0) is reliable).
+  #   See ProgramDirectory in components/lazutils/fileutil.inc, which does a simple hack,
+  #   and just looks for itself on $PATH .
+  #   It is used to determine lazarus.cfg but also Lazarus location itself.
+  #
+  #   Weirdly, it only works if lazarus.cfg is actually found and non-empty
+  #   in that directory.
+  #   See https://wiki.lazarus.freepascal.org/Multiple_Lazarus#Using_lazarus.cfg_file .
+  #   So we create a dummy lazarus.cfg .
+
+  mkdir lazarus_config/
+  cat <<EOF > lazarus/lazarus.cfg
+--primary-config-path=${WORKSPACE_ROOT}/lazarus_config/
+EOF
 
   # put "lazbuild" on $PATH
   prepend_to_path "${WORKSPACE_ROOT}/lazarus"
