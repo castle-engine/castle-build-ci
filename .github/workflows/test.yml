@@ -136,7 +136,7 @@ jobs:
           git clone https://github.com/castle-engine/castle-build-ci.git \
             --depth=1 --single-branch --branch=master
           castle-build-ci/install_dependencies
-          castle-build-ci/setup_castle_engine --lazarus=true
+          castle-build-ci/setup_castle_engine --install-lazarus=true
 
       - name: Package
         run: |
