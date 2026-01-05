@@ -151,7 +151,7 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: build-${{ matrix.runner }}
+          name: build-lazarus-${{ matrix.runner }}
           path: |
             test_project/*.zip
             test_project/*.tar.gz
