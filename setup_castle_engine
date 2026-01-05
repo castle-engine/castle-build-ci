@@ -270,6 +270,9 @@ do_get_lazarus()
 
   export LAZARUSDIR="${WORKSPACE_ROOT}/lazarus"
   preserve_variable_for_future_ci_steps LAZARUSDIR
+
+  # put "lazbuild" on $PATH
+  prepend_to_path "${WORKSPACE_ROOT}/lazarus"
 }
 
 # ----------------------------------------------------------------------------
