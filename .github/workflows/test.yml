@@ -142,23 +142,26 @@ jobs:
         run: |
           cd test_project
 
-          # Temporarily add build_using_lazbuild to manifest, to force using lazbuild
+          # Temporarily add build_using_lazbuild to manifest, to force using lazbuild .
           #
           # Also, to workaround issue fixed in https://github.com/castle-engine/castle-engine/commit/acda954bc9ec02b9b8be0953cab2da8f9a74df14 ,
           # add standalone_source to let our CGE build tool figure out the LPI name.
           # TODO: Simplify below, once CGE with this fix is snapshot.
-          #
-          # Also, workaround macOS (both x86_64 and aarch64) compilation crashing
+          sed -i.backup \
+            -e 's|<project|<project build_using_lazbuild="true" standalone_source="test_project_standalone.dpr"|' \
+            CastleEngineManifest.xml
+
+          castle-engine generate-program # generate LPI
+
+          # Workaround macOS (both x86_64 and aarch64) compilation crashing
           # with internal FPC error when Dwarf3 is used.
           # Done at CGE level in https://github.com/castle-engine/castle-engine/commit/c352bb763379aafcbff284aadc9d6bb5b2f45eac
           # TODO: Simplify below, once CGE with this fix is snapshot.
-
           sed -i.backup \
-            -e 's|<project|<project build_using_lazbuild="true" standalone_source="test_project_standalone.dpr"|' \
             -e 's|<DebugInfoType Value="dsDwarf3"/>||' \
             -e 's|<UseExternalDbgSyms Value="True"/>||' \
-            CastleEngineManifest.xml
-          castle-engine generate-program # generate LPI
+            test_project_standalone.lpi
+
           castle-engine package --verbose # package using lazbuild using LPI
           mv -f CastleEngineManifest.xml.backup CastleEngineManifest.xml
 
