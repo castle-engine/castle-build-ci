@@ -122,11 +122,8 @@ jobs:
         runner: [
           ubuntu-latest,
           windows-latest
-          # TODO: macOS on both CPUs fails with FPC internal error:
-          # /Users/runner/work/castle-build-ci/castle-build-ci/test_project/./code/gameinitialize.pas(50,1) Fatal: Internal error 200609171
-          # Test on real macOS and tweak to make it work.
-          #macos-latest, # macOS with Aarch64 (macOS Silicon)
-          #macos-15-intel # last macOS with Intel
+          macos-latest, # macOS with Aarch64 (macOS Silicon)
+          macos-15-intel # last macOS with Intel
         ]
     runs-on: ${{ matrix.runner }}
     steps:
@@ -142,6 +139,10 @@ jobs:
           castle-build-ci/setup_castle_engine --install-lazarus=true
 
       - name: Package
+        # TODO: macOS on both CPUs fails with FPC internal error:
+        # /Users/runner/work/castle-build-ci/castle-build-ci/test_project/./code/gameinitialize.pas(50,1) Fatal: Internal error 200609171
+        # Test on real macOS and tweak to make it work.
+        if: ${{ matrix.runner != 'macos-latest' && matrix.runner != 'macos-15-intel' }}
         run: |
           cd test_project
           # Temporarily add build_using_lazbuild to manifest, to force using lazbuild
@@ -153,6 +154,7 @@ jobs:
           mv -f CastleEngineManifest.xml.backup CastleEngineManifest.xml
 
       - name: Archive Artifacts
+        if: ${{ matrix.runner != 'macos-latest' && matrix.runner != 'macos-15-intel' }}
         uses: actions/upload-artifact@v6
         with:
           name: build-lazarus-${{ matrix.runner }}
