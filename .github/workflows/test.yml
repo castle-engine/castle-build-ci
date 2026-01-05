@@ -115,8 +115,8 @@ jobs:
           if-no-files-found: error
 
   # Build using lazbuild, just to test that --lazarus=true option works.
-  build:
-    name: Build using lazbuild
+  build_lazarus:
+    name: Build using Lazarus (lazbuild)
     strategy:
       matrix:
         runner: [
