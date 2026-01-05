@@ -4,7 +4,9 @@ Script [setup_castle_engine](./setup_castle_engine) to easily setup:
 
 - [Castle Game Engine](https://castle-engine.io/)
 
-- and [FPC (Free Pascal Compiler](https://www.freepascal.org/) (with [recommended version for CGE](https://github.com/castle-engine/castle-fpc/)).
+- and [FPC (Free Pascal Compiler](https://www.freepascal.org/) (with [recommended version for CGE](https://github.com/castle-engine/castle-fpc/))
+
+- and [Lazarus](https://www.lazarus-ide.org/) (with [recommended version for CGE](https://github.com/castle-engine/castle-lazarus/)). Note that Lazarus is not installed by default (because regular CGE projects don't need it), pass `--install-lazarus=true` to install it.
 
 The primary usage is within CI/CD, like [GitHub Actions](https://castle-engine.io/github_actions) (but also other CI/CD systems).
 
@@ -85,6 +87,20 @@ More complete example in the workflow within this repo, which is our own test: [
 - `--castle-engine-version=<git-branch-or-tag>`
 
     Castle Game Engine version (GIT [branch](https://github.com/castle-engine/castle-engine/branches) or [tag name](https://github.com/castle-engine/castle-engine/tags)). We use `snapshot` by default.
+
+- `--install-castle-engine=true|false`
+
+    Install _Castle Game Engine_. Enabled by default.
+
+- `--install-fpc=true|false`
+
+    Install _FPC (Free Pascal Compiler)_. Enabled by default.
+
+    Note that you need `fpc` to install CGE or Lazarus, so if you pass `--fpc=false` we assume that you have installed FPC in your CI job in some other way (e.g. `apt-get install fpc` on Linux). We also assume it's a version [supported by CGE](https://castle-engine.io/supported_compilers.php#section_fpc_version).
+
+- `--install-lazarus=true|false`
+
+    Install _Lazarus_. Disabled by default.
 
 Example execution with parameters:
 

@@ -75,19 +75,30 @@ do_parse_arguments()
   unset OS
   unset CPU
 
+  INSTALL_FPC='true'
+  INSTALL_LAZARUS='false'
+  INSTALL_CASTLE_ENGINE='true'
+
   for ARGUMENT in "$@"; do
     case "$ARGUMENT" in
       --os=*)
         OS="${ARGUMENT#*=}"
-        shift # past argument=value
         ;;
       --cpu=*)
         CPU="${ARGUMENT#*=}"
-        shift # past argument=value
         ;;
       --castle-engine-version=*)
         CASTLE_ENGINE_VERSION="${ARGUMENT#*=}"
-        shift # past argument=value
+        ;;
+      --install-castle-engine=true|--install-castle-engine=false)
+        # In case user passes other arguments, like --castle-engine=yes, let it fallback to default error
+        INSTALL_CASTLE_ENGINE="${ARGUMENT#*=}"
+        ;;
+      --install-fpc=true|--install-fpc=false)
+        INSTALL_FPC="${ARGUMENT#*=}"
+        ;;
+      --install-lazarus=true|--install-lazarus=false)
+        INSTALL_LAZARUS="${ARGUMENT#*=}"
         ;;
       *)
         echo "Unknown argument: $ARGUMENT"
@@ -230,6 +241,9 @@ do_get_fpc()
 # Get Castle Game Engine
 do_get_castle_engine()
 {
+  echo '-------------------------------------------------------------------'
+  echo 'Setting up Castle Game Engine'
+
   export CASTLE_ENGINE_PATH="${WORKSPACE_ROOT}/castle-engine"
   preserve_variable_for_future_ci_steps CASTLE_ENGINE_PATH
 
@@ -243,11 +257,40 @@ do_get_castle_engine()
   ./castle-engine_compile.sh
 }
 
+# Install Lazarus from https://github.com/castle-engine/castle-lazarus/
+do_get_lazarus()
+{
+  echo '-------------------------------------------------------------------'
+  echo 'Setting up Lazarus'
+
+  # Using --progress=... below because default wget progress (default or --progress=dot) causes hard to read output in GHA logs.
+  wget --progress=bar:force:noscroll \
+    https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${FPC_OS}-${FPC_CPU}.zip --output-document lazarus.zip
+  unzip -q lazarus.zip
+
+  # Setup lazbuild wrapper to pass proper --lazarusdir
+  mv lazarus/lazbuild lazarus/lazbuild-real
+  cat <<EOF
+#!/bin/bash
+set -eu
+# Call lazbuild with proper --lazarusdir
+${WORKSPACE_ROOT}/lazarus/lazbuild-real "--lazarusdir=${WORKSPACE_ROOT}" "$@"
+EOF
+  chmod +x lazarus/lazbuild
+}
+
 # ----------------------------------------------------------------------------
 # main: call functions
 
 do_parse_arguments "$@"
 do_setup_environment
 do_cleanup
-do_get_fpc
-do_get_castle_engine
+if [ "$INSTALL_FPC" = 'true' ] ; then
+  do_get_fpc
+fi
+if [ "$INSTALL_LAZARUS" = 'true' ] ; then
+  do_get_lazarus
+fi
+if [ "$INSTALL_CASTLE_ENGINE" = 'true' ] ; then
+  do_get_castle_engine
+fi

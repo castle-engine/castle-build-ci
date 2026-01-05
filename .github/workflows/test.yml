@@ -113,3 +113,47 @@ jobs:
             test_project/*.tar.gz
             test_project/*.apk
           if-no-files-found: error
+
+  # Build using lazbuild, just to test that --lazarus=true option works.
+  build:
+    name: Build using lazbuild
+    strategy:
+      matrix:
+        runner: [
+          ubuntu-latest,
+          windows-latest,
+          macos-latest, # macOS with Aarch64 (macOS Silicon)
+          macos-15-intel # last macOS with Intel
+        ]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout application
+        uses: actions/checkout@v6
+
+      - name: Setup Castle Game Engine (with Lazarus)
+        run: |
+          cd /tmp/ # temporary directory, to be separate from the current project files
+          git clone https://github.com/castle-engine/castle-build-ci.git \
+            --depth=1 --single-branch --branch=master
+          castle-build-ci/install_dependencies
+          castle-build-ci/setup_castle_engine --lazarus=true
+
+      - name: Package
+        run: |
+          cd test_project
+          # temporarily add build_using_lazbuild to manifest, to force using lazbuild
+          cp CastleEngineManifest.xml CastleEngineManifest.xml.backup
+          sed --in-place -e 's|<project|<project build_using_lazbuild="true"|' CastleEngineManifest.xml
+          castle-engine generate-program # generate LPI
+          castle-engine package --verbose # package using lazbuild using LPI
+          mv CastleEngineManifest.xml.backup CastleEngineManifest.xml
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-${{ matrix.runner }}
+          path: |
+            test_project/*.zip
+            test_project/*.tar.gz
+            test_project/*.apk
+          if-no-files-found: error
