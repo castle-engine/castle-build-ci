@@ -268,15 +268,8 @@ do_get_lazarus()
     https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip --output-document lazarus.zip
   unzip -q lazarus.zip
 
-  # Setup lazbuild wrapper to pass proper --lazarusdir
-  mv lazarus/lazbuild lazarus/lazbuild-real
-  cat <<EOF > lazarus/lazbuild
-#!/bin/bash
-set -eu
-# Call lazbuild with proper --lazarusdir
-${WORKSPACE_ROOT}/lazarus/lazbuild-real "--lazarusdir=${WORKSPACE_ROOT}" "$@"
-EOF
-  chmod +x lazarus/lazbuild
+  export LAZARUSDIR="${WORKSPACE_ROOT}/lazarus"
+  preserve_variable_for_future_ci_steps LAZARUSDIR
 }
 
 # ----------------------------------------------------------------------------
