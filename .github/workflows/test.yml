@@ -122,7 +122,10 @@ jobs:
         runner: [
           ubuntu-latest,
           windows-latest,
-          macos-latest, # macOS with Aarch64 (macOS Silicon)
+          # TODO: fails with FPC internal error:
+          # /Users/runner/work/castle-build-ci/castle-build-ci/test_project/./code/gameinitialize.pas(50,1) Fatal: Internal error 200609171
+          # maybe because of -O2? Test on macOS/Aarch64 and tweak to make it work.
+          #macos-latest, # macOS with Aarch64 (macOS Silicon)
           macos-15-intel # last macOS with Intel
         ]
     runs-on: ${{ matrix.runner }}
