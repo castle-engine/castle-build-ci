@@ -106,8 +106,8 @@ do_parse_arguments()
     case "`uname -s`" in
       Linux) OS='linux' ;;
       Darwin) OS='darwin' ;;
-      # see https://github.com/conan-io/conan/issues/4312
-      CYGWIN* | MINGW32* | MSYS*) OS='win64' ;; # by default choose 64-bit windows
+      # see https://github.com/conan-io/conan/issues/4312 , also MINGW64_NT is possible
+      CYGWIN* | MINGW* | MSYS*) OS='win64' ;; # by default choose 64-bit windows
       FreeBSD) OS='freebsd' ;;
       *)
         echo "Unknown OS: `uname -s`"
