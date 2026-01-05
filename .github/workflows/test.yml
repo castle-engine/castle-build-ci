@@ -146,7 +146,7 @@ jobs:
           sed --in-place -e 's|<project|<project build_using_lazbuild="true"|' CastleEngineManifest.xml
           castle-engine generate-program # generate LPI
           castle-engine package --verbose # package using lazbuild using LPI
-          mv CastleEngineManifest.xml.backup CastleEngineManifest.xml
+          mv -f CastleEngineManifest.xml.backup CastleEngineManifest.xml
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
