@@ -6,45 +6,14 @@ set -euo pipefail
 # - FPC (Free Pascal Compiler)
 # - and CGE (Castle Game Engine)
 #
-# Arguments: OS and CPU, in the FPC naming conventions.
-# Like "setup_castle_engine linux x86_64" .
-#
-# Current directory when this is called matters:
-# we assume it is the workspace, we will create fpc/ and castle-engine/ subdirs
-# there.
-#
-# After this is called, calling "castle-engine package" will package your project.
-# It enhances the PATH variable to include FPC and CGE build tool
-# by enhancing file $GITHUB_ENV (if defined) and setup_castle_engine_env.sh
-# (the latter useful for non-GitHub Action CI).
-#
-# Details what it does:
-#
-# - Get and setup FPC recommended to use with CGE.
-#
-#   This downloads FPC (to fpc/ subdir) from our
-#   https://github.com/castle-engine/castle-fpc releases
-#   which have prebuild FPC binary + FPC sources.
-#   And sets up fpc.cfg to use it properly (see castle-fpc/README.md docs).
-#
-# - Get and setup CGE in recommended way for CI/CD.
-#
-#   This downloads CGE sources from the "snapshot" tag
-#   (latest engine that passed automatic tests)
-#   and builds our build tool ("castle-engine")
-#   and sets CASTLE_ENGINE_PATH and PATH to put it on PATH.
+# See README.md within our repository
+# (https://github.com/castle-engine/castle-fpc/ ) for details and examples.
 # -----------------------------------------------------------------------------
 
-OS=$1
-CPU=$2
-shift 2
-
-#CASTLE_ENGINE_VERSION='snapshot'
-# TODO: just a test while LSOpenCFURLRef is in the process of being tested
-CASTLE_ENGINE_VERSION='master'
-
 # ----------------------------------------------------------------------------
-# bash functions
+# bash functions below.
+# do_xxx functions are executed in order by the main script,
+# other functions are helpers used by do_xxx functions.
 
 # Preserve variable named $1 for future CI steps.
 # Uses $GITHUB_ENV (if defined, in GitHub Actions) and to setup_castle_engine_env.sh.
@@ -99,6 +68,65 @@ prepend_to_path()
   # See github_actions_prepend_path.md for explanation.
 }
 
+# Parse command-line arguments. Pass here arguments to this script.
+do_parse_arguments()
+{
+
+  for ARGUMENT in "$@"; do
+    case "$ARGUMENT" in
+      --os=*)
+        OS="${ARGUMENT#*=}"
+        shift # past argument=value
+        ;;
+      --cpu=*)
+        CPU="${ARGUMENT#*=}"
+        shift # past argument=value
+        ;;
+      --castle-engine-version=*)
+        CASTLE_ENGINE_VERSION="${ARGUMENT#*=}"
+        shift # past argument=value
+        ;;
+      *)
+        echo "Unknown argument: $ARGUMENT"
+        exit 1
+        ;;
+      *)
+    esac
+  done
+
+  # apply defaults
+  if [ -z "${CASTLE_ENGINE_VERSION:-}" ] ; then
+    CASTLE_ENGINE_VERSION='snapshot'
+  fi
+
+  if [ -z "${OS:-}" ] ; then
+    case "`uname -s`" in
+      Linux) OS='linux' ;;
+      Darwin) OS='darwin' ;;
+      # see https://github.com/conan-io/conan/issues/4312
+      CYGWIN* | MINGW32* | MSYS*) OS='win64' ;; # by default choose 64-bit windows
+      FreeBSD) OS='freebsd' ;;
+      *)
+        echo "Unknown OS: `uname -s`"
+        exit 1
+        ;;
+    esac
+  fi
+
+  if [ -z "${CPU:-}" ] ; then
+    case "`uname -m`" in
+      x86_64) CPU='x86_64' ;;
+      i686) CPU='i386' ;;
+      aarch64) CPU='aarch64' ;;
+      armv7l) CPU='arm' ;;
+      *)
+        echo "Unknown CPU: `uname -m`"
+        exit 1
+        ;;
+    esac
+  fi
+}
+
 # Determine variables used in the rest of the script.
 do_setup_environment()
 {
@@ -113,6 +141,15 @@ do_setup_environment()
   fi
 
   DEFINES_FILE="${WORKSPACE_ROOT}/setup_castle_engine_env.sh"
+
+  echo "Variables calculated:"
+  echo "  OS: ${OS}"
+  echo "  CPU: ${CPU}"
+  echo "  CASTLE_ENGINE_VERSION: ${CASTLE_ENGINE_VERSION}"
+  echo "  WORKSPACE_ROOT: ${WORKSPACE_ROOT}"
+  echo "  WORKSPACE_ROOT_UNIX: ${WORKSPACE_ROOT_UNIX}"
+  echo "  DEFINES_FILE: ${DEFINES_FILE}"
+  echo
 }
 
 # Just in case, enable multiple runs of this script, by cleaning up
@@ -204,6 +241,7 @@ do_get_castle_engine()
 # ----------------------------------------------------------------------------
 # main: call functions
 
+do_parse_arguments "$@"
 do_setup_environment
 do_cleanup
 do_get_fpc

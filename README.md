@@ -8,13 +8,33 @@ Script [setup_castle_engine](./setup_castle_engine) to easily setup:
 
 The primary usage is within CI/CD, like [GitHub Actions](https://castle-engine.io/github_actions) (but also other CI/CD systems).
 
+## Details what it does
+
+Overall goal: After the `setup_castle_engine` script is called, you can use `castle-engine package` within your CI job to package your project.
+
+The script enhances the `$PATH` variable (and sets up a few other environment variables) to include FPC and CGE build tool by:
+
+- enhancing `$GITHUB_ENV` and `$GITHUB_PATH` (if defined, within GitHub Actions)
+
+- and generating `setup_castle_engine_env.sh` (this is useful for non-GitHub Action CI, and even within GHA to define variables within the same step).
+
+Details what it does:
+
+- Get and setup FPC recommended to use with CGE.
+
+    Downloads FPC (to fpc/ subdir) from our [castle-fpc](https://github.com/castle-engine/castle-fpc) releases which have prebuild FPC binary + FPC sources.
+
+    And sets up `fpc.cfg` to use it properly (see `castle-fpc/README.md` docs). The environment variable `$PPC_CONFIG_PATH` will point to it.
+
+- Get and setup CGE in recommended way for CI/CD.
+
+    This downloads CGE sources from the `snapshot` tag by default (latest engine that passed automatic tests) and builds our [build tool ("castle-engine")](https://castle-engine.io/build_tool) and sets `$CASTLE_ENGINE_PATH` and `$PATH` to use it.
+
 ## Usage
 
 Simply checkout this repo, and run `setup_castle_engine`.
 
 This is a _bash_ script. On GitHub-hosted runners, _bash_ is available on all systems, including Windows (through MSys2).
-
-Gets CGE code from `snapshot` branch (latest bleeding edge version that passed auto-tests).
 
 ## Usage example in GitHub Actions
 
@@ -33,36 +53,54 @@ jobs:
           ubuntu-latest,
           windows-latest
         ]
-        include:
-          - runner: ubuntu-latest
-            build_os: linux
-            build_cpu: x86_64
-          - runner: windows-latest
-            build_os: win64
-            build_cpu: x86_64
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout application
         uses: actions/checkout@v6
-        with:
-          # We need to checkout main application to the app/
-          # subdirectory of the workspace, to not collide (and not clean)
-          # repos castle-engine/ and fpc/ which we will also place in
-          # $GITHUB_WORKSPACE.
-          path: app/
 
       - name: Setup Castle Game Engine
         run: |
+          cd /tmp/ # temporary directory, to be separate from the current project files
           git clone https://github.com/castle-engine/castle-build-ci.git \
             --depth=1 --single-branch --branch=master
-          castle-build-ci/install_dependencies_hosted_runner
-          castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
+          castle-build-ci/install_dependencies
+          castle-build-ci/setup_castle_engine
 
       - name: Package
-        run: cd app && castle-engine package --verbose
+        run: castle-engine package --verbose
 ```
 
 More complete example in the workflow within this repo, which is our own test: [.github/workflows/test.yml](.github/workflows/test.yml).
+
+## Optional command-line arguments:
+
+- `--os=<os>`
+
+    OS (operating system) name, following the FPC naming conventions. This specifies both source and target OS. See [castle-fpc/build_fpc](https://github.com/castle-engine/castle-fpc/blob/master/build_fpc) script documentation for details why it is useful, (despite specifying both source and target OS). We auto-detect it if not specified.
+
+- `--cpu=<cpu>`
+
+    CPU (processor, architecture) name, following the FPC naming conventions. This specifies both source and target CPU. We auto-detect it if not specified.
+
+- `--castle-engine-version=<git-branch-or-tag>`
+
+    Castle Game Engine version (GIT [branch](https://github.com/castle-engine/castle-engine/branches) or [tag name](https://github.com/castle-engine/castle-engine/tags)). We use `snapshot` by default.
+
+Example execution with parameters:
+
+```
+setup_castle_engine --os=linux --cpu=x86_64 --castle-engine-version=v7.0-alpha.3
+```
+
+## Current directory
+
+Current directory when this is called matters:
+
+- We will create `fpc/` and `castle-engine/` subdirs there.
+
+- We will create `setup_castle_engine_env.sh` there.
+
+- In CI jobs, it is most comfortable to use a temporary directory like `/tmp/`, also to clone this repo (`castle-build-ci`) into a temporary directory. See above for example usage.
 
 ## Environment variables and usage outside of GitHub Actions
 

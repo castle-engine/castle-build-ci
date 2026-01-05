@@ -22,48 +22,30 @@ jobs:
           macos-latest, # macOS with Aarch64 (macOS Silicon)
           macos-15-intel # last macOS with Intel
         ]
-        include:
-          - runner: ubuntu-latest
-            build_os: linux
-            build_cpu: x86_64
-          - runner: windows-latest
-            build_os: win64
-            build_cpu: x86_64
-          - runner: macos-latest
-            build_os: darwin
-            build_cpu: aarch64
-          - runner: macos-15-intel
-            build_os: darwin
-            build_cpu: x86_64
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout application
         uses: actions/checkout@v6
-        with:
-          # We need to checkout main application to the app/
-          # subdirectory of the workspace, to not collide (and not clean)
-          # repos castle-engine/ and fpc/ which we will also place in
-          # $GITHUB_WORKSPACE.
-          path: app/
 
       - name: Setup Castle Game Engine
         run: |
+          cd /tmp/ # temporary directory, to be separate from the current project files
           git clone https://github.com/castle-engine/castle-build-ci.git \
             --depth=1 --single-branch --branch=master
-          castle-build-ci/install_dependencies_hosted_runner
-          castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
+          castle-build-ci/install_dependencies
+          castle-build-ci/setup_castle_engine
 
       - name: Package
-        run: cd app/test_project && castle-engine package --verbose
+        run: cd test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-${{ matrix.runner }}
           path: |
-            app/test_project/*.zip
-            app/test_project/*.tar.gz
-            app/test_project/*.apk
+            test_project/*.zip
+            test_project/*.tar.gz
+            test_project/*.apk
           if-no-files-found: error
 
   # Build on ARM runners (for Raspberry Pi) using pguyot/arm-runner-action .
@@ -74,30 +56,20 @@ jobs:
       matrix:
         arch: [raspberry-pi-32, raspberry-pi-64]
         include:
-
         # additional defines for Raspberry Pi 32-bit (Arm)
         - arch: raspberry-pi-32
           # Arguments for pguyot/arm-runner-action
           cpu: cortex-a7
           base_image: raspios_lite:latest
-          # Arguments for build_lazarus script.
-          build_os: linux
-          build_cpu: arm
-
         # additional defines for Raspberry Pi 64-bit (Aarch64)
         - arch: raspberry-pi-64
           # Arguments for pguyot/arm-runner-action
           cpu: cortex-a53
           base_image: raspios_lite_arm64:latest
-          # Arguments for build_lazarus script.
-          build_os: linux
-          build_cpu: aarch64
 
     steps:
       - name: Checkout app
         uses: actions/checkout@v6
-        with:
-          path: app/
 
       - uses: pguyot/arm-runner-action@v2
         with:
@@ -112,27 +84,32 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y git
 
-            # GITHUB_ENV is defined now, but invalid, it refers to filename
-            # inside ubuntu-latest runner which doesn't exist inside ARM runner.
-            # Unset it, to prevent using by setup_castle_engine_env.sh .
+            # GITHUB_ENV and GITHUB_PATH are defined now, but invalid,
+            # they refer to filenames inside ubuntu-latest runner
+            # which don't exist inside ARM runner.
+            # Unset them, to prevent using by setup_castle_engine .
             unset GITHUB_ENV
+            unset GITHUB_PATH
 
             # get and run setup_castle_engine
+            pushd /tmp/
+            cd /tmp/
             git clone https://github.com/castle-engine/castle-build-ci.git \
               --depth=1 --single-branch --branch=master
-            castle-build-ci/install_dependencies_hosted_runner
-            castle-build-ci/setup_castle_engine ${{ matrix.build_os }} ${{ matrix.build_cpu }}
+            castle-build-ci/install_dependencies
+            castle-build-ci/setup_castle_engine
             source setup_castle_engine_env.sh
+            popd
 
             # build application
-            cd app/test_project && castle-engine package --verbose
+            cd test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-arm-${{ matrix.arch }}
           path: |
-            app/test_project/*.zip
-            app/test_project/*.tar.gz
-            app/test_project/*.apk
+            test_project/*.zip
+            test_project/*.tar.gz
+            test_project/*.apk
           if-no-files-found: error
