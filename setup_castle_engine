@@ -71,6 +71,9 @@ prepend_to_path()
 # Parse command-line arguments. Pass here arguments to this script.
 do_parse_arguments()
 {
+  # in case some system defines $OS or $CPU, like Windows on GHA has OS=Windows_NT
+  unset OS
+  unset CPU
 
   for ARGUMENT in "$@"; do
     case "$ARGUMENT" in
