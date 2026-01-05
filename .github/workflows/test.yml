@@ -142,8 +142,7 @@ jobs:
         run: |
           cd test_project
           # temporarily add build_using_lazbuild to manifest, to force using lazbuild
-          cp CastleEngineManifest.xml CastleEngineManifest.xml.backup
-          sed --in-place -e 's|<project|<project build_using_lazbuild="true"|' CastleEngineManifest.xml
+          sed -i.backup -e 's|<project|<project build_using_lazbuild="true"|' CastleEngineManifest.xml
           castle-engine generate-program # generate LPI
           castle-engine package --verbose # package using lazbuild using LPI
           mv -f CastleEngineManifest.xml.backup CastleEngineManifest.xml
