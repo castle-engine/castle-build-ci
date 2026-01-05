@@ -141,8 +141,10 @@ jobs:
       - name: Package
         run: |
           cd test_project
-          # temporarily add build_using_lazbuild to manifest, to force using lazbuild
-          sed -i.backup -e 's|<project|<project build_using_lazbuild="true"|' CastleEngineManifest.xml
+          # Temporarily add build_using_lazbuild to manifest, to force using lazbuild
+          # Also, to workaround issue fixed in https://github.com/castle-engine/castle-engine/commit/acda954bc9ec02b9b8be0953cab2da8f9a74df14 ,
+          # add standalone_source to let our CGE build tool figure out the LPI name.
+          sed -i.backup -e 's|<project|<project build_using_lazbuild="true" standalone_source="test_project_standalone.dpr"|' CastleEngineManifest.xml
           castle-engine generate-program # generate LPI
           castle-engine package --verbose # package using lazbuild using LPI
           mv -f CastleEngineManifest.xml.backup CastleEngineManifest.xml
