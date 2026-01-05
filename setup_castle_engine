@@ -284,20 +284,18 @@ do_get_lazarus()
   #     export LAZARUSDIR="${WORKSPACE_ROOT}/lazarus"
   #     preserve_variable_for_future_ci_steps LAZARUSDIR
   #
-  # - Lazarus command-line code has actually code to determine
+  # - Lazarus command-line code has code to determine
   #   lazbuild[.exe] location even on Unix (where ParamStr(0) is reliable).
   #   See ProgramDirectory in components/lazutils/fileutil.inc, which does a simple hack,
   #   and just looks for itself on $PATH .
-  #   It is used to determine lazarus.cfg but also Lazarus location itself.
+  #   It is used to determine lazarus.cfg .
   #
-  #   Weirdly, it only works if lazarus.cfg is actually found and non-empty
-  #   in that directory.
-  #   See https://wiki.lazarus.freepascal.org/Multiple_Lazarus#Using_lazarus.cfg_file .
-  #   So we create a dummy lazarus.cfg .
+  #   And in lazarus.cfg, we can use --lazarusdir= .
+  #   See https://wiki.lazarus.freepascal.org/Multiple_Lazarus#Using_lazarus.cfg_file
+  #   and the file it is read in Lazarus sources lazarus/ide/idecmdline.pas .
 
-  mkdir lazarus_config/
   cat <<EOF > lazarus/lazarus.cfg
---primary-config-path=${WORKSPACE_ROOT}/lazarus_config/
+--lazarusdir=${WORKSPACE_ROOT}/lazarus
 EOF
 
   # put "lazbuild" on $PATH
