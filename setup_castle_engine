@@ -319,6 +319,12 @@ EOF
 
   # put "lazbuild" on $PATH
   prepend_to_path "${WORKSPACE_ROOT}/lazarus"
+
+  # This subdirectory is unnecessary, and it prevents running "install"
+  # in certain situations ("install" from CGE Makefile).
+  # Looks like bash is smart to not find directories in $PATH,
+  # but GNU make it not that smart.
+  rm -Rf lazarus/install
 }
 
 # ----------------------------------------------------------------------------
