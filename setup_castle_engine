@@ -183,11 +183,14 @@ do_get_fpc()
 
   # Using --progress=... below because default wget progress
   # (default or --progress=dot) causes hard to read output in GHA logs.
+  # Using --output-document because by default, wget adds suffix when file exists,
+  # placing it under new name.
   wget --progress=bar:force:noscroll \
-    https://github.com/castle-engine/castle-fpc/releases/download/snapshot/fpc-${OS}-${CPU}.zip
+    https://github.com/castle-engine/castle-fpc/releases/download/snapshot/fpc-${OS}-${CPU}.zip \
+    --output-document castle-fpc.zip
 
   # Use -q for more readable output in logs.
-  unzip -q fpc-${OS}-${CPU}.zip
+  unzip -q castle-fpc.zip
 
   # Use PPC_CONFIG_PATH to provide custom fpc.cfg
   # in a way that is cross-platform (otherwise, we'd need to use ~/.fpc.cfg
@@ -263,9 +266,10 @@ do_get_lazarus()
   echo '-------------------------------------------------------------------'
   echo 'Setting up Lazarus'
 
-  # Using --progress=... below because default wget progress (default or --progress=dot) causes hard to read output in GHA logs.
+  # See do_get_fpc for reasons behind wget and unzip flags.
   wget --progress=bar:force:noscroll \
-    https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip --output-document lazarus.zip
+    https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip \
+    --output-document lazarus.zip
   unzip -q lazarus.zip
 
   # We want to point lazbuild to the Lazarus location.
