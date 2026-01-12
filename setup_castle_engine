@@ -90,6 +90,10 @@ do_parse_arguments()
       --castle-engine-version=*)
         CASTLE_ENGINE_VERSION="${ARGUMENT#*=}"
         ;;
+      --fpc-version=stable|--fpc-version=unstable)
+        # Call this FPC_VERSION_LABEL, not FPC_VERSION, for consistency with build_fpc script.
+        FPC_VERSION_LABEL="${ARGUMENT#*=}"
+        ;;
       --install-castle-engine=true|--install-castle-engine=false)
         # In case user passes other arguments, like --castle-engine=yes, let it fallback to default error
         INSTALL_CASTLE_ENGINE="${ARGUMENT#*=}"
@@ -111,6 +115,10 @@ do_parse_arguments()
   # apply defaults
   if [ -z "${CASTLE_ENGINE_VERSION:-}" ] ; then
     CASTLE_ENGINE_VERSION='snapshot'
+  fi
+
+  if [ -z "${FPC_VERSION_LABEL:-}" ] ; then
+    FPC_VERSION_LABEL='stable'
   fi
 
   if [ -z "${OS:-}" ] ; then
@@ -181,12 +189,27 @@ do_get_fpc()
   echo '-------------------------------------------------------------------'
   echo 'Setting up FPC'
 
+  # calculate ZIP_NAME
+  case "${FPC_VERSION_LABEL}" in
+    stable)
+      local FPC_VERSION_TO_ZIP=''
+      ;;
+    unstable)
+      local FPC_VERSION_TO_ZIP='unstable-'
+      ;;
+    *)
+      echo "Unknown FPC version: ${FPC_VERSION_LABEL}"
+      exit 1
+    ;;
+  esac
+  local ZIP_NAME="fpc-${FPC_VERSION_TO_ZIP}${OS}-${CPU}.zip"
+
   # Using --progress=... below because default wget progress
   # (default or --progress=dot) causes hard to read output in GHA logs.
   # Using --output-document because by default, wget adds suffix when file exists,
   # placing it under new name.
   wget --progress=bar:force:noscroll \
-    https://github.com/castle-engine/castle-fpc/releases/download/snapshot/fpc-${OS}-${CPU}.zip \
+    "https://github.com/castle-engine/castle-fpc/releases/download/snapshot/${ZIP_NAME}" \
     --output-document castle-fpc.zip
 
   # Use -q for more readable output in logs.

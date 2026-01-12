@@ -88,6 +88,16 @@ More complete example in the workflow within this repo, which is our own test: [
 
     Castle Game Engine version (GIT [branch](https://github.com/castle-engine/castle-engine/branches) or [tag name](https://github.com/castle-engine/castle-engine/tags)). We use `snapshot` by default.
 
+- `--fpc-version=stable|unstable`
+
+    FPC version to use. See [castle-fpc](https://github.com/castle-engine/castle-fpc) for the exact meaninig of `stable` and `unstable`, in short:
+
+    - `stable` is the "best stable" FPC version that we test with CGE. Equals now FPC 3.2.2 on most platforms, and 3.2.3 (from `fixes_3_2` branch) some some exceptions.
+
+    - `unstable` is a particular tested commit of the FPC `main` branch, with FPC 3.3.1.
+
+    We use `stable` by default.
+
 - `--install-castle-engine=true|false`
 
     Install _Castle Game Engine_. Enabled by default.
