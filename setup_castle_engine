@@ -108,7 +108,6 @@ do_parse_arguments()
         echo "Unknown argument: $ARGUMENT"
         exit 1
         ;;
-      *)
     esac
   done
 
