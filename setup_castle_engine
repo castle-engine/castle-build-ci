@@ -57,9 +57,9 @@ prepend_to_path()
 
   # extend GITHUB_PATH, if GITHUB_PATH defined and valid.
   # Following https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-system-path
-  if [ -n "${GITHUB_ENV:-}" ] ; then
-    if [ -d "`dirname \"${GITHUB_ENV}\"`" ] ; then
-      echo "${DIR}" >> $GITHUB_PATH
+  if [ -n "${GITHUB_PATH:-}" ] ; then
+    if [ -d "`dirname \"${GITHUB_PATH}\"`" ] ; then
+      echo "${DIR}" >> "${GITHUB_PATH}"
     fi
   fi
 
@@ -278,7 +278,7 @@ do_get_castle_engine()
     --branch "${CASTLE_ENGINE_VERSION}" \
     https://github.com/castle-engine/castle-engine/
 
-  cd $CASTLE_ENGINE_PATH/tools/build-tool/
+  cd "${CASTLE_ENGINE_PATH}/tools/build-tool/"
   ./castle-engine_compile.sh
 }
 
@@ -290,7 +290,7 @@ do_get_lazarus()
 
   # See do_get_fpc for reasons behind wget and unzip flags.
   wget --progress=bar:force:noscroll \
-    https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip \
+    "https://github.com/castle-engine/castle-lazarus/releases/download/snapshot/lazarus-${OS}-${CPU}.zip" \
     --output-document lazarus.zip
   unzip -q lazarus.zip
 
