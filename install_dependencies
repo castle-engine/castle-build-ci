@@ -23,7 +23,9 @@ if which apt-get > /dev/null 2>&1; then
   $SUDO apt-get update
   # See https://castle-engine.io/compiling_from_source.php behind
   # some of the dependencies like libgtk2.0-dev .
-  $SUDO apt-get install -y wget libgtk2.0-dev libgl-dev
+  # TODO: For now, we install both GTK 2 and 3 dependencies,
+  # as we're switching GTK 2 -> 3.
+  $SUDO apt-get install -y wget libgtk2.0-dev libgl-dev libgtk-3-dev
 fi
 
 if which choco > /dev/null 2>&1; then
