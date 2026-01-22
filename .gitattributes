@@ -1,0 +1,4 @@
+# Force Unix line endings for all files in this repository.
+# This repository contains bash scripts, which must use Unix line endings (LF),
+# even on Windows, and regardless of user's GIT line ending settings.
+* text eol=lf
