@@ -41,7 +41,7 @@ Full example: See the [Castle Model Viewer](https://castle-engine.io/castle-mode
 
 ## Background and a small Apple rant
 
-Apple makes runnning unsigned applications harder and harder for users. Whether it's motivated, at this point, by real security concerns (don't run applications from devs you don't trust, whether they are signed or not), or by their obsessive need to control everything that is distributed in the Apple ecosystem, is another question which I leave for you to decide.
+Apple makes running unsigned applications harder and harder for users. Whether it's motivated, at this point, by real security concerns (don't run applications from devs you don't trust, whether they are signed or not), or by their obsessive need to control everything that is distributed in the Apple ecosystem, is another question which I leave for you to decide.
 
 - Older macOS versions forced users to perform unintuitive UX to run unsigned applications (double-clicking would not allow it, but right-click + open would have the option to still run unsigned).
 
