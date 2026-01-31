@@ -12,13 +12,23 @@ set -euo pipefail
 # Options:
 # $1 is bundle directory (like "castle-model-viewer.app")
 # $2 is main executable name (like "castle-model-viewer")
-# $3 (optional) is additional executable name in ${BUNDLE}/Contents/MacOS/
-#    (like "castle-model-converter"). Just omit this parameter if none such exists.
+#
+# Before using this script, sign *all but the main executable* inside bundle
+# using sign_executable script. This follows Apple rules to "sign from
+# the innermost files".
+# You can usually ignore this -- most normal applications have just one
+# binary file inside the bundle.
 # ------------------------------------------------------------------------------
 
 BUNDLE="$1"
 MAIN_EXE="$2"
-ADDITIONAL_EXE="${3:-}"
+shift 2
+
+# error if excessive command-line parameters
+if [ $# -ne 0 ]; then
+  echo "ERROR: Excessive command-line parameters. Usage: $0 BUNDLE MAIN_EXE"
+  exit 1
+fi
 
 echo '-------------------------------'
 echo 'Checking is our APPLE_IDENTITY valid (should be in the keychain):'
@@ -30,9 +40,6 @@ fi
 
 echo '-------------------------------'
 echo 'Signing the app bundle:'
-if [ -n "$ADDITIONAL_EXE" ]; then
-  codesign -s "$APPLE_IDENTITY" --timestamp -o runtime "${BUNDLE}/Contents/MacOS/${ADDITIONAL_EXE}"
-fi
 # command below should sign the main executable
 codesign -s "$APPLE_IDENTITY" --timestamp -o runtime "${BUNDLE}"
 
@@ -40,9 +47,6 @@ echo '-------------------------------'
 echo 'Checking validity of the signed app bundle (without --deep):'
 codesign -d -vv "${BUNDLE}"
 codesign -d -vv "${BUNDLE}/Contents/MacOS/${MAIN_EXE}"
-if [ -n "$ADDITIONAL_EXE" ]; then
-  codesign -d -vv "${BUNDLE}/Contents/MacOS/${ADDITIONAL_EXE}"
-fi
 
 echo '-------------------------------'
 echo 'Checking validity of the signed app bundle (with --deep):'

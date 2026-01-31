@@ -1,14 +1,14 @@
 # Scripts to sign (and notarize) macOS applications
 
-These scripts perform the complete process of
+These scripts perform the complete process of _signing_ and _notarizing_  macOS applications.
 
-- [signing](https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac)
+- [Signing](https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac) means we use `codesign` to confirm that the executables are created by a trusted developer.
 
-- and [notarizing](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow?language=objc)
+- [Notarizing](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow?language=objc) means applications are uploaded to Apple servers for further verification.
 
-...macOS applications.
+You want to perform the above steps, to have macOS application that runs "out of the box" for users without any warnings / errors from Apple.
 
-You want to perform these steps, to have macOS application that runs "out of the box" for users without any warnings / errors from Apple.
+NOTE: In order to use this, you must be [Apple Developer (100 USD per year)](https://developer.apple.com/).
 
 ## Usage
 
@@ -33,13 +33,15 @@ In the simplest case, once you have cloned https://github.com/castle-engine/cast
       castle-model-viewer.app castle-model-viewer
 ```
 
-You will need to setup some secrets and variables in your GitHub repository settings, as seen above. Follow the [Installing an Apple certificate on macOS runners for Xcode development](https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications) for links how to do it.
+You will need to setup some [secrets and variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) in your GitHub repository (or organization) settings, as seen above. Follow the [Installing an Apple certificate on macOS runners for Xcode development](https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications) for links how to do it.
+
+NOTE: The above split into GitHub _secrets_ and _variables_ is just an example. Our scripts just expect appropriate environment variables to be set, how you achieve it is up to you.
 
 Full example: See the [Castle Model Viewer](https://castle-engine.io/castle-model-viewer) workflow for GitHub Actions: https://github.com/castle-engine/castle-model-viewer/blob/master/.github/workflows/build.yml
 
 ## Background and a small Apple rant
 
-Apple makes runnning unsigned applications harder and harder for users. Whether it's motivated, at this point, by real security concerns, or just their obsessive need to control (and eventually veto) everything that is distributed in their ecosystem (and force all devs to purchase annually their "Apple Memberhip") is another question which I leave for the reader to decide.
+Apple makes runnning unsigned applications harder and harder for users. Whether it's motivated, at this point, by real security concerns (don't run applications from devs you don't trust, whether they are signed or not), or by their obsessive need to control everything that is distributed in the Apple ecosystem, is another question which I leave for you to decide.
 
 - Older macOS versions forced users to perform unintuitive UX to run unsigned applications (double-clicking would not allow it, but right-click + open would have the option to still run unsigned).
 

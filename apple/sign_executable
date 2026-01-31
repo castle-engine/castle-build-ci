@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+
+# ------------------------------------------------------------------------------
+# Codesign executable file(s) ("Unix executable" in Apple terminology).
+#
+# Codesigning follows
+# https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac
+#
+# Provide as many parameters as you want.
+# - Filenames are assumed to be binaries to be signed.
+# - Directories will be scanned for executable files (find -executable)
+#   and those will be signed.
+# ------------------------------------------------------------------------------
+
+echo '-------------------------------'
+echo 'Checking is our APPLE_IDENTITY valid (should be in the keychain):'
+security find-identity -p codesigning -v
+if ! grep --fixed-strings "$APPLE_IDENTITY" <(security find-identity -p codesigning -v); then
+  echo 'ERROR: APPLE_IDENTITY not found in the keychain!'
+  exit 1
+fi
+
+do_sign_file ()
+{
+  local FILE="$1"
+  echo '-------------------------------'
+  echo "Signing $FILE:"
+  codesign -s "$APPLE_IDENTITY" --timestamp -o runtime "$FILE"
+  echo "Validate $FILE signature:"
+  codesign -d -vv "$FILE"
+}
+
+for F in "$@"; do
+  if [ -d "$F" ]; then
+    find "$F" -type f -executable -print0 | while read -d $'\0' FILE; do
+      do_sign_file "$FILE"
+    done
+  else
+    do_sign_file "$F"
+  fi
+done
