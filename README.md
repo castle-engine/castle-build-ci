@@ -173,3 +173,8 @@ Alternatives:
   - just `git clone` the [CGE repository](https://github.com/castle-engine/castle-engine/) and build the _build tool_ following [instructions](https://castle-engine.io/compiling_from_source.php). This is what we do in the 2nd part of `setup_castle_engine` script for you, but it's really not difficult to do it yourself :)
   - downloading [binary release](https://github.com/castle-engine/castle-engine/releases/snapshot) using `curl` or `wget` in your script.
 
+## See also: Apple signing scripts
+
+As a bonus, see [apple/README.md](apple/README.md) for scripts to sign and notarize macOS applications.
+
+If you make macOS applications, you can use these scripts to have your application signed and notarized automatically in CI/CD.
