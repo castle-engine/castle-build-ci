@@ -34,7 +34,7 @@ echo '-------------------------------'
 echo 'Checking is our APPLE_IDENTITY valid (should be in the keychain):'
 security find-identity -p codesigning -v
 if ! security find-identity -p codesigning -v | grep --fixed-strings "$APPLE_IDENTITY" > /dev/null; then
-  echo 'Codesigning error: APPLE_IDENTITY not found in the keychain!'
+  echo 'Codesigning error: APPLE_IDENTITY not found in the keychain'
   exit 1
 fi
 
