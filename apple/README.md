@@ -12,9 +12,19 @@ NOTE: In order to use this, you must be [Apple Developer (100 USD per year)](htt
 
 ## Usage
 
-In the simplest case, once you have cloned https://github.com/castle-engine/castle-build-ci to `/tmp/` in your runner, you just do a step like this:
+After you have cloned https://github.com/castle-engine/castle-build-ci to `/tmp/` in your runner, in the simplest case you call `setup_signing` and `sign_notarize_bundle` in a dedicated step in your workflow. Do this between building your application to the "app bundle" and packaging it to zip.
+
+Below example shows all the steps, packaging as usual for non-macOS platforms, and on macOS first packaging to app bundle, then signing and notarizing, and finally placing the app bundle in a zip. This example uses `castle-engine output ...` calls to determine project information, so this can be copy-pasted and just work for your projects.
 
 ```yaml
+- name: Package (non-macOS)
+  if: ${{ runner.os != 'macOS' }}
+  run: castle-engine package
+
+- name: Package to Bundle (macOS)
+  if: ${{ runner.os == 'macOS' }}
+  run: castle-engine package --package-format=mac-app-bundle
+
 - name: Sign and Notarize (macOS)
   if: ${{ runner.os == 'macOS' }}
   env:
@@ -30,14 +40,28 @@ In the simplest case, once you have cloned https://github.com/castle-engine/cast
   run: |
     /tmp/castle-build-ci/apple/setup_signing
     /tmp/castle-build-ci/apple/sign_notarize_bundle \
-      castle-model-viewer.app castle-model-viewer
+      "`castle-engine output caption`.app" \
+      "`castle-engine output executable-name`"
+
+- name: Package to Zip (macOS)
+  if: ${{ runner.os == 'macOS' }}
+  run: |
+    zip -r "`castle-engine output package-name`" "`castle-engine output caption`.app/"
 ```
 
 You will need to setup some [secrets and variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) in your GitHub repository (or organization) settings, as seen above. Follow the [Installing an Apple certificate on macOS runners for Xcode development](https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications) for links how to do it.
 
 NOTE: The above split into GitHub _secrets_ and _variables_ is just an example. Our scripts just expect appropriate environment variables to be set, how you achieve it is up to you.
 
-Full example: See the [Castle Model Viewer](https://castle-engine.io/castle-model-viewer) workflow for GitHub Actions: https://github.com/castle-engine/castle-model-viewer/blob/master/.github/workflows/build.yml
+Full examples:
+
+- See the [Castle Image Viewer](https://castle-engine.io/castle-image-viewer) workflow for GitHub Actions: https://github.com/castle-engine/castle-image-viewer/blob/master/.github/workflows/build.yml .
+
+    This one is rather straightforward.
+
+- See the [Castle Model Viewer](https://castle-engine.io/castle-model-viewer) workflow for GitHub Actions: https://github.com/castle-engine/castle-model-viewer/blob/master/.github/workflows/build.yml .
+
+    This one is more complex, as it adds an extra command-line utility to the bundle.
 
 ## Background and a small Apple rant
 
