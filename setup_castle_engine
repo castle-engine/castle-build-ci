@@ -199,7 +199,7 @@ do_get_fpc()
     *)
       echo "Unknown FPC version: ${FPC_VERSION_LABEL}"
       exit 1
-    ;;
+      ;;
   esac
   local ZIP_NAME="fpc-${FPC_VERSION_TO_ZIP}${OS}-${CPU}.zip"
 
@@ -236,9 +236,10 @@ do_get_fpc()
     # MAC_SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
     # MAC_XCODE=/Applications/Xcode.app/Contents/Developer
 
-    echo "-XR${MAC_SDK}" >> "${FPC_CFG}"
-    echo "-Fl${MAC_SDK}/usr/lib" >> "${FPC_CFG}"
-    echo "-FD${MAC_XCODE}/Toolchains/XcodeDefault.xctoolchain/usr/bin" >> "${FPC_CFG}"
+    { echo "-XR${MAC_SDK}"
+      echo "-Fl${MAC_SDK}/usr/lib"
+      echo "-FD${MAC_XCODE}/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+    } >> "${FPC_CFG}"
 
     # Linking on newer macOS, with Aarch64, requires -WMxxx (it is also OK on x86_64).
     # See also fpcupdeluxe logic:

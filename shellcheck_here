@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Validate correctness of scripts here:
+# Run shellcheck on all executable files here.
+# -----------------------------------------------------------------------------
+
+find \
+  '(' -type d -name '.git' -prune ')' -or \
+  '(' -type f -path './test_project/test_project' ')' -or \
+  '(' -type f -perm /111 -exec shellcheck '{}' ';' ')'

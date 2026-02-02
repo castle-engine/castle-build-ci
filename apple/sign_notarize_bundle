@@ -54,17 +54,17 @@ check_codesign()
   codesign "$@"
   REQUIRED_AUTHORITY="Authority=${APPLE_IDENTITY}"
   if ! codesign "$@" 2>&1 | grep --fixed-strings "$REQUIRED_AUTHORITY" > /dev/null; then
-    echo 'Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details'
+    echo "Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details"
     exit 1
   fi
   REQUIRED_AUTHORITY="Authority=Developer ID Certification Authority"
   if ! codesign "$@" 2>&1 | grep --fixed-strings "$REQUIRED_AUTHORITY" > /dev/null; then
-    echo 'Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details'
+    echo "Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details"
     exit 1
   fi
   REQUIRED_AUTHORITY="Authority=Apple Root CA"
   if ! codesign "$@" 2>&1 | grep --fixed-strings "$REQUIRED_AUTHORITY" > /dev/null; then
-    echo 'Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details'
+    echo "Codesigning validation error: Failed to find authority ${REQUIRED_AUTHORITY}, consult above output for details"
     exit 1
   fi
 }
