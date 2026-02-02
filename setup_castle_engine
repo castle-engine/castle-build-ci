@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
@@ -22,8 +22,8 @@ preserve_variable_for_future_ci_steps()
   VAR=$1
   shift 1
 
-  if [ -n "${GITHUB_ENV:-}" ] ; then
-    if [ -d "`dirname \"${GITHUB_ENV}\"`" ] ; then
+  if [[ -n "${GITHUB_ENV:-}" ]]; then
+    if [[ -d "$(dirname "${GITHUB_ENV}")" ]]; then
       echo "$VAR=${!VAR}" >> "${GITHUB_ENV}"
     else
       echo "Warning: GITHUB_ENV is defined (${GITHUB_ENV}), but the directory it points to doesn't exist."
@@ -43,8 +43,8 @@ prepend_to_path()
   DIR=$1
   shift 1
 
-  if which cygpath > /dev/null 2>&1; then
-    DIR_UNIX="`cygpath --unix \"${DIR}\"`"
+  if command -v cygpath > /dev/null 2>&1; then
+    DIR_UNIX="$(cygpath --unix "${DIR}")"
   else
     DIR_UNIX="${DIR}"
   fi
@@ -57,8 +57,8 @@ prepend_to_path()
 
   # extend GITHUB_PATH, if GITHUB_PATH defined and valid.
   # Following https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-system-path
-  if [ -n "${GITHUB_PATH:-}" ] ; then
-    if [ -d "`dirname \"${GITHUB_PATH}\"`" ] ; then
+  if [[ -n "${GITHUB_PATH:-}" ]]; then
+    if [[ -d "$(dirname "${GITHUB_PATH}")" ]]; then
       echo "${DIR}" >> "${GITHUB_PATH}"
     fi
   fi
@@ -112,30 +112,30 @@ do_parse_arguments()
   done
 
   # apply defaults
-  if [ -z "${CASTLE_ENGINE_VERSION:-}" ] ; then
+  if [[ -z "${CASTLE_ENGINE_VERSION:-}" ]]; then
     CASTLE_ENGINE_VERSION='snapshot'
   fi
 
-  if [ -z "${FPC_VERSION_LABEL:-}" ] ; then
+  if [[ -z "${FPC_VERSION_LABEL:-}" ]]; then
     FPC_VERSION_LABEL='stable'
   fi
 
-  if [ -z "${OS:-}" ] ; then
-    case "`uname -s`" in
+  if [[ -z "${OS:-}" ]]; then
+    case "$(uname -s)" in
       Linux) OS='linux' ;;
       Darwin) OS='darwin' ;;
       # see https://github.com/conan-io/conan/issues/4312 , also MINGW64_NT is possible
       CYGWIN* | MINGW* | MSYS*) OS='win64' ;; # by default choose 64-bit windows
       FreeBSD) OS='freebsd' ;;
       *)
-        echo "Unknown OS: `uname -s`"
+        echo "Unknown OS: $(uname -s)"
         exit 1
         ;;
     esac
   fi
 
-  if [ -z "${CPU:-}" ] ; then
-    case "`uname -m`" in
+  if [[ -z "${CPU:-}" ]]; then
+    case "$(uname -m)" in
       x86_64) CPU='x86_64' ;;
       i686) CPU='i386' ;;
       # Raspberry Pi 64 reports aarch64 .
@@ -143,7 +143,7 @@ do_parse_arguments()
       aarch64|arm64) CPU='aarch64' ;;
       armv7l) CPU='arm' ;;
       *)
-        echo "Unknown CPU: `uname -m`"
+        echo "Unknown CPU: $(uname -m)"
         exit 1
         ;;
     esac
@@ -157,10 +157,10 @@ do_setup_environment()
   # On Windows they differ:
   # - WORKSPACE_ROOT_UNIX is in Cygwin path format (with /, without :, more suitable for $PATH)
   # - WORKSPACE_ROOT is in native (on Windows) path format, understood also by non-Msys2/Cygwin tools
-  WORKSPACE_ROOT_UNIX="`pwd`"
+  WORKSPACE_ROOT_UNIX="$(pwd)"
   WORKSPACE_ROOT="${WORKSPACE_ROOT_UNIX}"
-  if which cygpath > /dev/null; then
-    WORKSPACE_ROOT="`cygpath --mixed \"${WORKSPACE_ROOT}\"`"
+  if command -v cygpath > /dev/null; then
+    WORKSPACE_ROOT="$(cygpath --mixed "${WORKSPACE_ROOT}")"
   fi
 
   DEFINES_FILE="${WORKSPACE_ROOT}/setup_castle_engine_env.sh"
@@ -229,9 +229,9 @@ do_get_fpc()
 
   # Add macOS specific flags, see castle-fpc/README.md for reasons.
   # Otherwise, linking on newer macOS versions fails.
-  if [ "$OS" = "darwin" ] ; then
-    MAC_SDK="`xcrun --show-sdk-path`"
-    MAC_XCODE="`xcode-select --print-path`"
+  if [[ "${OS}" = "darwin" ]]; then
+    MAC_SDK="$(xcrun --show-sdk-path)"
+    MAC_XCODE="$(xcode-select --print-path)"
     # Typical results:
     # MAC_SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
     # MAC_XCODE=/Applications/Xcode.app/Contents/Developer
@@ -245,7 +245,7 @@ do_get_fpc()
     # https://github.com/LongDirtyAnimAlf/fpcupdeluxe/blob/63228f718e24e0a5e77c8f5b70e269ba92393b9d/sources/crossinstallers/m_darwin_to_apple_base.pas#L232
     # Some discussion in:
     # https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/41570
-    MAC_SDK_VERSION="`xcrun --show-sdk-version`"
+    MAC_SDK_VERSION="$(xcrun --show-sdk-version)"
     echo "SDK version is ${MAC_SDK_VERSION}, assuming it is >= 11.0"
     echo "-WM10.15" >> "${FPC_CFG}"
   fi
@@ -359,12 +359,12 @@ EOF
 do_parse_arguments "$@"
 do_setup_environment
 do_cleanup
-if [ "$INSTALL_FPC" = 'true' ] ; then
+if [[ "${INSTALL_FPC}" = 'true' ]]; then
   do_get_fpc
 fi
-if [ "$INSTALL_LAZARUS" = 'true' ] ; then
+if [[ "${INSTALL_LAZARUS}" = 'true' ]]; then
   do_get_lazarus
 fi
-if [ "$INSTALL_CASTLE_ENGINE" = 'true' ] ; then
+if [[ "${INSTALL_CASTLE_ENGINE}" = 'true' ]]; then
   do_get_castle_engine
 fi

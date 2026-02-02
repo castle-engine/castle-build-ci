@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # ------------------------------------------------------------------
@@ -10,11 +10,11 @@ set -euo pipefail
 # every time the workflow is performed).
 # ------------------------------------------------------------------
 
-if which apt-get > /dev/null 2>&1; then
+if command -v apt-get > /dev/null 2>&1; then
   echo "Installing Linux dependencies"
 
   # On GitLab CI, execute without sudo.
-  if which sudo > /dev/null 2>&1; then
+  if command -v sudo > /dev/null 2>&1; then
     SUDO=sudo
   else
     SUDO=
@@ -28,13 +28,13 @@ if which apt-get > /dev/null 2>&1; then
   $SUDO apt-get install -y wget libgtk2.0-dev libgl-dev libgtk-3-dev
 fi
 
-if which choco > /dev/null 2>&1; then
+if command -v choco > /dev/null 2>&1; then
   echo "Installing Windows dependencies"
   # --no-progress avoids too verbose progress output in CI logs.
   choco install --no-progress wget
 fi
 
-if which brew > /dev/null 2>&1; then
+if command -v brew > /dev/null 2>&1; then
   echo "Installing macOS dependencies"
   # No need, wget is already installed on macOS runners.
   # brew install wget

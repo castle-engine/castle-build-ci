@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # ------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ MAIN_EXE="$2"
 shift 2
 
 # error if excessive command-line parameters
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
   echo "Codesigning error: Excessive command-line parameters. Usage: $0 BUNDLE MAIN_EXE"
   exit 1
 fi
@@ -90,7 +90,7 @@ echo 'Notarizing the app bundle:'
 # Notarization only actually looks at executables in the application bundle,
 # though we have to "staple" whole bundle.
 rm -f temp-notarize.zip
-zip -r temp-notarize.zip ${BUNDLE}/
+zip -r temp-notarize.zip "${BUNDLE}/"
 xcrun notarytool submit temp-notarize.zip \
   --apple-id "$APPLE_ID" \
   --password "$APPLE_APP_PASSWORD" \
@@ -100,4 +100,4 @@ rm -f temp-notarize.zip
 
 echo '-------------------------------'
 echo 'Stapling the app bundle:'
-xcrun stapler staple ${BUNDLE}
+xcrun stapler staple "${BUNDLE}"

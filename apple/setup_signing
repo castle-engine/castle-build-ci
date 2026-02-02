@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # ------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ set -euo pipefail
 # See https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications .
 # ------------------------------------------------------------------------------
 
-if [ -n "${RUNNER_TEMP:-}" ] ; then
+if [[ -n "${RUNNER_TEMP:-}" ]]; then
   TEMP_DIR="${RUNNER_TEMP}"
 else
   TEMP_DIR="/tmp"
