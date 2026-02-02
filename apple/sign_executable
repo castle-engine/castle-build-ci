@@ -33,8 +33,19 @@ do_sign_file ()
 
 for F in "$@"; do
   if [[ -d "$F" ]]; then
-    # Note that -executable is not available on macOS, use -perm /111 instead.
-    find "$F" -type f -perm /111 -print0 | while read -rd $'\0' FILE; do
+
+    # Note that "find ... -executable" or "find ... -perm /111" are not available
+    # on macOS "find" version.
+    # What works on macOS is "find +111", but it has been deprecated and then
+    # removed from the latest GNU find on Linux...
+
+    if [[ "$(uname -s)" = 'Darwin' ]]; then
+      FIND_EXECUTABLE='+111'
+    else
+      FIND_EXECUTABLE='-executable'
+    fi
+
+    find "$F" -type f -perm "${FIND_EXECUTABLE}" -print0 | while read -rd $'\0' FILE; do
       do_sign_file "$FILE"
     done
   else
