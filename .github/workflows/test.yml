@@ -114,7 +114,7 @@ jobs:
             test_project/*.apk
           if-no-files-found: error
 
-  # Build using lazbuild, just to test that --lazarus=true option works.
+  # Build using lazbuild, just to test that --install-lazarus=true option works.
   build_lazarus:
     name: Build using Lazarus (lazbuild)
     strategy:
