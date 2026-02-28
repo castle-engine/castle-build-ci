@@ -39,7 +39,7 @@ jobs:
         run: cd test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-${{ matrix.runner }}
           path: |
@@ -105,7 +105,7 @@ jobs:
             cd test_project && castle-engine package --verbose
 
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-arm-${{ matrix.arch }}
           path: |
@@ -167,7 +167,7 @@ jobs:
 
       - name: Archive Artifacts
         if: ${{ matrix.runner != 'macos-latest' && matrix.runner != 'macos-15-intel' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-lazarus-${{ matrix.runner }}
           path: |
