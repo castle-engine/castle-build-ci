@@ -148,6 +148,11 @@ do_parse_arguments()
         ;;
     esac
   fi
+
+  # For now, we need to force using unstable FPC for Windows on ARM
+  if [[ "${OS}" = "win64" -a "${CPU}" = "aarch64" ]]; then
+    FPC_VERSION_LABEL='unstable'
+  fi
 }
 
 # Determine variables used in the rest of the script.
