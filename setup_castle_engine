@@ -150,7 +150,7 @@ do_parse_arguments()
   fi
 
   # For now, we need to force using unstable FPC for Windows on ARM
-  if [[ "${OS}" = "win64" -a "${CPU}" = "aarch64" ]]; then
+  if [[ "${OS}" = "win64" && "${CPU}" = "aarch64" ]]; then
     FPC_VERSION_LABEL='unstable'
   fi
 }
