@@ -4,6 +4,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 # Sign executables (given on command line) with Azure Artifact Signing.
 # Multiple files can be provided as parameters on command line, to sign at once.
+# Provide directory to find all *.exe and *.dll inside it (recursively).
 # See README.md for more details.
 # -----------------------------------------------------------------------------
 
@@ -68,16 +69,39 @@ fi
 SIGNTOOL="$(printf '%s\n' "${SIGNTOOL_CANDIDATES[@]}" | sort --version-sort | tail -n 1)"
 echo "Using SignTool: ${SIGNTOOL}"
 
-# ------------------------------------------------------------------------
-# sign
+# -----------------------------------------------------------------------------
+# Calculate FILES_TO_SIGN bash array with filenames.
 
-# execute
+FILES_TO_SIGN=()
+for F in "$@"; do
+  if [[ -d "$F" ]]; then
+    shopt -s nullglob globstar nocaseglob
+    for FILE in "$F"/**/*.exe "$F"/**/*.dll; do
+      FILES_TO_SIGN+=("$FILE")
+    done
+    shopt -u nullglob globstar nocaseglob
+  else
+    FILES_TO_SIGN+=("$F")
+  fi
+done
+
+if [ "${#FILES_TO_SIGN[@]}" -eq 0 ]; then
+  echo "No files to sign (checked parameters: $*)"
+  exit 1
+fi
+
+echo "Files to sign: ${FILES_TO_SIGN[*]}"
+
+# ------------------------------------------------------------------------
+# execute signtool
+# (single invocation for multiple files)
+
 "${SIGNTOOL}" sign /v /debug /fd SHA256 \
   /tr "http://timestamp.acs.microsoft.com" \
   /td SHA256 \
   /dlib "${ARTIFACT_SIGNING_DLL}" \
   /dmdf "${AZURE_SIGNING_METADATA}" \
-  "$@"
+  "${FILES_TO_SIGN[@]}"
 
 echo "Signing completed successfully."
 
@@ -87,13 +111,13 @@ echo "Verifying by SignTool..."
 # Use
 #   $SignTool verify /?
 # to explain options.
-"${SIGNTOOL}" verify /pa /v /tw "$@"
+"${SIGNTOOL}" verify /pa /v /tw "${FILES_TO_SIGN[@]}"
 
 echo "------------------------------------------------------------------"
 echo "Verifying by Get-AuthenticodeSignature..."
 
 # Check signature details without SignTool (useful on other machines)
-for F in "$@"; do
+for F in "${FILES_TO_SIGN[@]}"; do
   powershell.exe -NoProfile -Command "Get-AuthenticodeSignature '$F' | Format-List"
 done
 

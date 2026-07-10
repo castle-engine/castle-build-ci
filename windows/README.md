@@ -54,12 +54,14 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
 `setup_signing` simply installs ArtifactSigning DLL from Microsoft
 into `$AZURE_SIGNING_CLIENT_PARENT` directory.
 
-`sign_executable` signs executables (given on command line).
-Multiple files can be provided as parameters on command line, to sign at once.
-Filenames are expected to be Windows executables (EXE, DLL, etc)
-with native paths (not Cygwin paths), absolute or relative.
+`sign_executable` signs executables (given on the command line).
 
-Both are bash scripts, suitable for all bash flavors on Windows
+- Multiple files can be provided as parameters on command line, to sign at once.
+- Directory can be provided to find all `*.exe`, `*.dll` inside it (recursively).
+- All filenames and directory names are expected to be native Windows paths
+  (not Cygwin paths), absolute or relative.
+
+These are bash scripts, suitable for all bash flavors on Windows
 (_Cygwin_, _MSys2_, _Git Bash_).
 
 They run on Windows (like your normal Windows system,
