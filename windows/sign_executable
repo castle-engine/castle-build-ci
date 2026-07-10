@@ -102,10 +102,13 @@ echo "Files to sign: ${FILES_TO_SIGN[*]}"
 # signing
 
 # calculate AZURE_SIGNING_METADATA location (in temp dir)
-if [ -n "$RUNNER_TEMP" ]; then
+if [ -n "${RUNNER_TEMP:-}" ]; then
   AZURE_SIGNING_METADATA="${RUNNER_TEMP}/azure_signing_metadata.json"
 else
   AZURE_SIGNING_METADATA="$(mktemp -t azure_signing_metadata.XXXXXX.json)"
+  if which cygpath > /dev/null; then
+    AZURE_SIGNING_METADATA="$(cygpath --mixed "${AZURE_SIGNING_METADATA}")"
+  fi
 fi
 
 # create AZURE_SIGNING_METADATA contents
