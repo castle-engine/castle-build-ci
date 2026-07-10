@@ -23,7 +23,7 @@ These scripts perform signing using the solution we chose for [Castle Game Engin
 
 ## Usage
 
-In short: In your CI workflow, like [GitHub Actions](https://castle-engine.io/github_actions) workflow, call `setup_signing` and then `sign_executable` scripts from this directory to sign your Windows executables.
+In short: In your CI workflow, like [GitHub Actions](https://castle-engine.io/github_actions) workflow, call `setup_signing` and then `sign_executables` scripts from this directory to sign your Windows executables.
 
 Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Azure CLI `az login`. See Azure docs how to be logged-in inside CI like GitHub actions. The recommended way to do this uses _federated credentials_ and GitHub secrets, and is in turn limited to specific branches. So you typically sign only specific branches.
 
@@ -31,7 +31,7 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
 
 ```yaml
 # Login to Azure.
-# sign_executable (SignTool or jsign inside) depend on this to sign executables
+# sign_executables (SignTool or jsign inside) depend on this to sign executables
 # with Azure Artifact Signing.
 - name: Azure Login (Windows)
   if: ${{ runner.os == 'Windows' && github.ref == 'refs/heads/master' }}
@@ -50,7 +50,7 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
   run: |
     export AZURE_SIGNING_CLIENT_PARENT="$RUNNER_TEMP/sign-tools/"
     /tmp/castle-build-ci/windows/setup_signing
-    /tmp/castle-build-ci/windows/sign_executable \
+    /tmp/castle-build-ci/windows/sign_executables \
       "`castle-engine output executable-name`.exe"
 ```
 
@@ -59,7 +59,7 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
 `setup_signing` simply installs ArtifactSigning DLL from Microsoft
 into `$AZURE_SIGNING_CLIENT_PARENT` directory.
 
-`sign_executable` signs executables (given on the command line).
+`sign_executables` signs executables (given on the command line).
 
 - Multiple files can be provided as parameters on command line, to sign at once.
 - Directory can be provided to find all `*.exe`, `*.dll` inside it (recursively).
@@ -86,14 +86,14 @@ Requirements:
 
 - Environment variable `AZURE_SIGNING_CLIENT_PARENT` must point
   to a directory where the ArtifactSigning DLL from Microsoft will be installed
-  by `setup_signing` and then used by `sign_executable`.
+  by `setup_signing` and then used by `sign_executables`.
 
     This directory doesn't have to exist before `setup_signing`,
     it will be created if needed.
 
     It can be really any directory, it can be a temporary directory
     if you are on an ephemeral CI runner (like GitHub Actions)
-    and so you always call `setup_signing` before `sign_executable`.
+    and so you always call `setup_signing` before `sign_executables`.
     Example is `$RUNNER_TEMP/sign-tools/`.
 
 - Additional environment variables provide metadata for signing.

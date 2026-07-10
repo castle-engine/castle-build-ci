@@ -12,7 +12,7 @@ set -euo pipefail
 # - .NET 8 runtime
 # - Microsoft.Windows.SDK.BuildTools with signtool.exe
 #
-# So we don't install them, and "sign_executable" script will just use them.
+# So we don't install them, and "sign_executables" script will just use them.
 # ---------------------------------------------------------------------------
 
 if [ -z "${AZURE_SIGNING_CLIENT_PARENT:-}" ]; then

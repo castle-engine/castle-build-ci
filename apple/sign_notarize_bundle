@@ -14,7 +14,7 @@ set -euo pipefail
 # $2 is main executable name (like "castle-model-viewer")
 #
 # Before using this script, sign *all but the main executables* inside
-# the bundle using sign_executable script. This follows Apple rules to
+# the bundle using sign_executables script. This follows Apple rules to
 # "sign from the innermost files".
 # You can usually ignore this -- most normal applications have just one
 # binary file inside the bundle.
