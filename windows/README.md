@@ -30,9 +30,11 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
 ## Example
 
 ```yaml
-# Login using Azure, SignTool depends on this to sign executables with Azure Artifact Signing.
+# Login to Azure.
+# sign_executable (SignTool or jsign inside) depend on this to sign executables
+# with Azure Artifact Signing.
 - name: Azure Login (Windows)
-  if: ${{ runner.os == 'Windows' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test-windows-signing' ) }}
+  if: ${{ runner.os == 'Windows' && github.ref == 'refs/heads/master' }}
   uses: azure/login@v3
   with:
     client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -40,9 +42,12 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 - name: Sign (Windows)
-  if: ${{ runner.os == 'Windows' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test-windows-signing' ) }}
+  if: ${{ runner.os == 'Windows' && github.ref == 'refs/heads/master' }}
+  env:
+    AZURE_ENDPOINT: ${{ vars.AZURE_ENDPOINT }}
+    AZURE_CODESIGNING_ACCOUNT_NAME: ${{ vars.AZURE_CODESIGNING_ACCOUNT_NAME }}
+    AZURE_CERTIFICATE_PROFILE_NAME: ${{ vars.AZURE_CERTIFICATE_PROFILE_NAME }}
   run: |
-    export AZURE_SIGNING_METADATA="windows-signing/azure_metadata.json"
     export AZURE_SIGNING_CLIENT_PARENT="$RUNNER_TEMP/sign-tools/"
     /tmp/castle-build-ci/windows/setup_signing
     /tmp/castle-build-ci/windows/sign_executable \
@@ -79,21 +84,36 @@ Requirements:
 - Being logged-in to Azure, like by Azure CLI `az login`.
   See Azure docs how to be logged-in inside CI like GitHub actions.
 
-- `AZURE_SIGNING_METADATA` environment variable must be set to
-  JSON metadata for signing.
-  See https://learn.microsoft.com/en-us/azure/artifact-signing/how-to-signing-integrations .
+- Environment variable `AZURE_SIGNING_CLIENT_PARENT` must point
+  to a directory where the ArtifactSigning DLL from Microsoft will be installed
+  by `setup_signing` and then used by `sign_executable`.
 
-  This looks like:
+    This directory doesn't have to exist before `setup_signing`,
+    it will be created if needed.
 
-  ```
-  {
-    "Endpoint": "https://plc.codesigning.azure.net",
-    "CodeSigningAccountName": "cge-artifact-signer",
-    "CertificateProfileName": "cge-sign-releases"
-  }
-  ```
+    It can be really any directory, it can be a temporary directory
+    if you are on an ephemeral CI runner (like GitHub Actions)
+    and so you always call `setup_signing` before `sign_executable`.
+    Example is `$RUNNER_TEMP/sign-tools/`.
 
-  The values visible in JSON above are not secret, no worries, you can just commit this JSON to public repo. The secret exchange happens during Azure Login, and even this can+should be _federated_ so a GitHub token is a key to Azure -- but explaining it is beyond the scope of this README:), follow Azure docs for that.
+- Additional environment variables provide metadata for signing.
+  Must be synchronized with your Azure Artifact Signing configuration:
+
+    - `AZURE_ENDPOINT` - for example `plc.codesigning.azure.net`
+    - `AZURE_CODESIGNING_ACCOUNT_NAME` - for example `cge-artifact-signer`
+    - `AZURE_CERTIFICATE_PROFILE_NAME` - for example `cge-sign-releases`
+
+    These variables are used to generate a JSON metadata for signing,
+    as documented in Azure docs:
+    https://learn.microsoft.com/en-us/azure/artifact-signing/how-to-signing-integrations .
+
+    `SignTool` takes this metadata as a JSON file, while `jsign` takes them
+    as command line parameters. Provide them as environment variables,
+    and forget about differences between `SignTool` and `jsign`.
+
+    Note that the values visible above are not secret.
+    You can place them in repo files, or as repo variables
+    (like GitHub Actions `vars`).
 
 ## Why express this as bash scripts, not GitHub Actions?
 

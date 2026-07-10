@@ -28,19 +28,24 @@ if [ -z "${AZURE_SIGNING_CLIENT_PARENT:-}" ]; then
   echo "AZURE_SIGNING_CLIENT_PARENT environment variable is not set. Please set it to the parent directory of Microsoft.ArtifactSigning.Client."
   exit 1
 fi
-if [ -z "${AZURE_SIGNING_METADATA:-}" ]; then
-  echo "AZURE_SIGNING_METADATA environment variable is not set. Please set it to the path of the Azure Signing Metadata JSON file."
+if [ -z "${AZURE_ENDPOINT:-}" ]; then
+  echo "AZURE_ENDPOINT environment variable is not set. Please set it to the Azure endpoint."
+  exit 1
+fi
+if [ -z "${AZURE_CODESIGNING_ACCOUNT_NAME:-}" ]; then
+  echo "AZURE_CODESIGNING_ACCOUNT_NAME environment variable is not set. Please set it to the Azure code signing account name."
+  exit 1
+fi
+if [ -z "${AZURE_CERTIFICATE_PROFILE_NAME:-}" ]; then
+  echo "AZURE_CERTIFICATE_PROFILE_NAME environment variable is not set. Please set it to the Azure certificate profile name."
   exit 1
 fi
 
-# env vars point to existing files
+# calculate ARTIFACT_SIGNING_DLL, and make sure it (along with AZURE_SIGNING_CLIENT_PARENT)
+# is valid
 ARTIFACT_SIGNING_DLL="${AZURE_SIGNING_CLIENT_PARENT}/Microsoft.ArtifactSigning.Client/bin/x64/Azure.CodeSigning.Dlib.dll"
 if [ ! -f "${ARTIFACT_SIGNING_DLL}" ]; then
   echo "Artifact Signing DLL not found at expected location: ${ARTIFACT_SIGNING_DLL}"
-  exit 1
-fi
-if [ ! -f "${AZURE_SIGNING_METADATA}" ]; then
-  echo "Azure Signing Metadata JSON file not found at expected location: ${AZURE_SIGNING_METADATA}"
   exit 1
 fi
 
@@ -94,9 +99,26 @@ fi
 echo "Files to sign: ${FILES_TO_SIGN[*]}"
 
 # ------------------------------------------------------------------------
+# signing
+
+# calculate AZURE_SIGNING_METADATA location (in temp dir)
+if [ -n "$RUNNER_TEMP" ]; then
+  AZURE_SIGNING_METADATA="${RUNNER_TEMP}/azure_signing_metadata.json"
+else
+  AZURE_SIGNING_METADATA="$(mktemp -t azure_signing_metadata.XXXXXX.json)"
+fi
+
+# create AZURE_SIGNING_METADATA contents
+cat > "${AZURE_SIGNING_METADATA}" <<EOF
+{
+  "Endpoint": "https://${AZURE_ENDPOINT}",
+  "CodeSigningAccountName": "${AZURE_CODESIGNING_ACCOUNT_NAME}",
+  "CertificateProfileName": "${AZURE_CERTIFICATE_PROFILE_NAME}"
+}
+EOF
+
 # execute signtool
 # (single invocation for multiple files)
-
 "${SIGNTOOL}" sign /v /debug /fd SHA256 \
   /tr "http://timestamp.acs.microsoft.com" \
   /td SHA256 \
