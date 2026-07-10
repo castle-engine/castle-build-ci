@@ -94,3 +94,22 @@ Requirements:
   ```
 
   The values visible in JSON above are not secret, no worries, you can just commit this JSON to public repo. The secret exchange happens during Azure Login, and even this can+should be _federated_ so a GitHub token is a key to Azure -- but explaining it is beyond the scope of this README:), follow Azure docs for that.
+
+## Why express this as bash scripts, not GitHub Actions?
+
+There are already [GitHub Actions to sign Windows executables using Azure](https://github.com/Azure/artifact-signing-action). I prefer to wrap it in reusable bash scripts, because:
+
+- It allows to perform signing in the middle of another script. For example:
+
+    - Signing can be done in the middle of [castle-fpc/build_fpc](https://github.com/castle-engine/castle-fpc/blob/master/build_fpc).
+
+    - Signing can be done in the middle of [castle-engine/.../pack_release.sh](https://github.com/castle-engine/castle-engine/blob/master/tools/internal/pack_release/pack_release.sh).
+
+    Both above scripts perform multiple steps, and signing is just one of them. If signing was a GitHub Action, we would need to split the script in two, reinitializing variables. This makes maintenance harder, and we would need more and more splits for platform-specific needs: e.g. Apple requires, after signing, also to notarize the application bundle (so, split the `pack_release.sh` script more). On Windows, InnoSetup needs to sign uninstaller.
+
+    Doing such "splitting scripts" means that we move logic from bash scripts to YAML files in GitHub Actions. YAML files would get longer and more complex, and would execute smaller and simpler bash scripts. I prefer to keep the logic in bash scripts.
+
+- Moreover, it gives us some independence from GitHub Actions. To some extent, these scripts are useful in other CI systems, or even locally on our own Windows machine.
+
+    It keeps the door open for [full migration from GitHub to Codeberg](https://castle-engine.io/wp/2026/01/18/engine-downloads-with-bundled-fpc-for-all-platforms-castle-build-ci-to-easily-use-ci-with-our-engine-woodpecker-codeberg-ci-examples-and-impressions/).
+
