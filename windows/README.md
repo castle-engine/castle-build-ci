@@ -25,12 +25,14 @@ These script perform signing using the solution we chose for [Castle Game Engine
 
 In short: In your CI workflow, like [GitHub Actions](https://castle-engine.io/github_actions) workflow, call `setup_signing` and then `sign_executable` scripts from this directory to sign your Windows executables.
 
+Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Azure CLI `az login`. See Azure docs how to be logged-in inside CI like GitHub actions. The recommended way to do this uses _federated credentials_ and GitHub secrets, and is in turn limited to specific branches. So you typically sign only specific branches.
+
 ## Example
 
 ```yaml
 # Login using Azure, SignTool depends on this to sign executables with Azure Artifact Signing.
 - name: Azure Login (Windows)
-  if: ${{ runner.os == 'Windows' }}
+  if: ${{ runner.os == 'Windows' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test-windows-signing' ) }}
   uses: azure/login@v3
   with:
     client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -38,7 +40,7 @@ In short: In your CI workflow, like [GitHub Actions](https://castle-engine.io/gi
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 - name: Sign (Windows)
-  if: ${{ runner.os == 'Windows' }}
+  if: ${{ runner.os == 'Windows' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test-windows-signing' ) }}
   run: |
     export AZURE_SIGNING_METADATA="windows-signing/azure_metadata.json"
     export AZURE_SIGNING_CLIENT_PARENT="$RUNNER_TEMP/sign-tools/"
