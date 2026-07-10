@@ -1,0 +1,101 @@
+#!/bin/bash
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Sign executables (given on command line) with Azure Artifact Signing.
+# Multiples files can be provided as parameters on command line, to sign at once.
+# See README.md for more details.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------
+# Adjust Msys2, in case this runs inside MSys2 (like in GitHub Actions runner).
+
+# Avoid MSYS2 path conversion, as we pass parameters that look like Unix paths.
+# See https://github.com/castle-engine/castle-engine/blob/9520e3414e0e4653770e3ef0679f63e33c3ef6cb/.github/workflows/test-and-pack-runner-native.yml#L110
+# for more explanation what does MSys2 do any why it's *crazy* (because can be
+# really unexpected, break things in weirdest way, mangling your parameters).
+export MSYS2_ENV_CONV_EXCL='*'
+export MSYS2_ARG_CONV_EXCL='*'
+export MSYS_NO_PATHCONV=1
+
+# -----------------------------------------------------------------------
+# Validate necessary environment variables are set, files exist, etc.
+
+# env vars not empty
+if [ -z "${AZURE_SIGNING_CLIENT_PARENT:-}" ]; then
+  echo "AZURE_SIGNING_CLIENT_PARENT environment variable is not set. Please set it to the parent directory of Microsoft.ArtifactSigning.Client."
+  exit 1
+fi
+if [ -z "${AZURE_SIGNING_METADATA:-}" ]; then
+  echo "AZURE_SIGNING_METADATA environment variable is not set. Please set it to the path of the Azure Signing Metadata JSON file."
+  exit 1
+fi
+
+# env vars point to existing files
+ARTIFACT_SIGNING_DLL="${AZURE_SIGNING_CLIENT_PARENT}/Microsoft.ArtifactSigning.Client/bin/x64/Azure.CodeSigning.Dlib.dll"
+if [ ! -f "${ARTIFACT_SIGNING_DLL}" ]; then
+  echo "Artifact Signing DLL not found at expected location: ${ARTIFACT_SIGNING_DLL}"
+  exit 1
+fi
+if [ ! -f "${AZURE_SIGNING_METADATA}" ]; then
+  echo "Azure Signing Metadata JSON file not found at expected location: ${AZURE_SIGNING_METADATA}"
+  exit 1
+fi
+
+# at least one parameter (file to sign) is provided
+[ $# -ge 1 ] || {
+  echo "Usage: $0 file.exe [file2.dll ...]"
+  exit 1;
+}
+
+# ------------------------------------------------------------------------
+# Find $SIGNTOOL, the latest version of signtool.exe from Windows SDK.
+
+# Glob the SDK version subdirectory (like 10.0.28000.0), to not depend on
+# the exact SDK version; take the latest if multiple are installed.
+# Note: Artifact Signing requires SignTool >= 10.0.2261.
+PROGRAM_FILES_X86="$(cygpath "$(printenv 'ProgramFiles(x86)')")"
+
+shopt -s nullglob
+SIGNTOOL_CANDIDATES=("${PROGRAM_FILES_X86}/Windows Kits/10/bin/"10.*"/x64/signtool.exe")
+shopt -u nullglob
+
+if [ "${#SIGNTOOL_CANDIDATES[@]}" -eq 0 ]; then
+  echo "signtool.exe not found, tried: ${PROGRAM_FILES_X86}/Windows Kits/10/bin/10.*/x64/signtool.exe"
+  exit 1
+fi
+
+SIGNTOOL="$(printf '%s\n' "${SIGNTOOL_CANDIDATES[@]}" | sort --version-sort | tail -n 1)"
+echo "Using SignTool: ${SIGNTOOL}"
+
+# ------------------------------------------------------------------------
+# sign
+
+# execute
+"${SIGNTOOL}" sign /v /debug /fd SHA256 \
+  /tr "http://timestamp.acs.microsoft.com" \
+  /td SHA256 \
+  /dlib "${ARTIFACT_SIGNING_DLL}" \
+  /dmdf "${AZURE_SIGNING_METADATA}" \
+  "$@"
+
+echo "Signing completed successfully."
+
+echo "------------------------------------------------------------------"
+echo "Verifying by SignTool..."
+
+# Use
+#   $SignTool verify /?
+# to explain options.
+"${SIGNTOOL}" verify /pa /v /tw "$@"
+
+echo "------------------------------------------------------------------"
+echo "Verifying by Get-AuthenticodeSignature..."
+
+# Check signature details without SignTool (useful on other machines)
+for F in "$@"; do
+  powershell.exe -NoProfile -Command "Get-AuthenticodeSignature '$F' | Format-List"
+done
+
+echo "------------------------------------------------------------------"
+echo "Done."

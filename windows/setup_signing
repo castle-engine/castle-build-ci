@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Install necessary dependencies for signing executables on Windows
+# with Azure Artifact Signing.
+# See README.md for more details.
+#
+# For now, this script assumes that we're on GitHub Actions GH-hosted runner,
+# which already has
+# - nuget.exe
+# - .NET 8 runtime
+# - Microsoft.Windows.SDK.BuildTools with signtool.exe
+#
+# So we don't install them, and "sign_executable" script will just use them.
+# ---------------------------------------------------------------------------
+
+if [ -z "${AZURE_SIGNING_CLIENT_PARENT:-}" ]; then
+  echo "AZURE_SIGNING_CLIENT_PARENT environment variable is not set. Please set it to the desired parent directory of Microsoft.ArtifactSigning.Client. Can be a temporary directory, like \$RUNNER_TEMP/sign-tools."
+  exit 1
+fi
+
+nuget install Microsoft.ArtifactSigning.Client -x -OutputDirectory "${AZURE_SIGNING_CLIENT_PARENT}"
