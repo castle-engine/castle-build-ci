@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+echo 'Deprecated: We renamed sign_executable -> sign_executables. Please use the new "sign_executables" name.'
+# try to find sign_executables in the same directory as this script
+SCRIPT_DIR="$(dirname "$0")"
+if [[ -x "${SCRIPT_DIR}/sign_executables" ]]; then
+  exec "${SCRIPT_DIR}/sign_executables" "$@"
+else
+  echo 'ERROR: Cannot find sign_executables in the same directory as this script, cannot perform backward-compatibility redirect. Please use the new "sign_executables" name.'
+  exit 1
+fi
