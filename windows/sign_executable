@@ -3,7 +3,7 @@ set -euo pipefail
 
 # -----------------------------------------------------------------------------
 # Sign executables (given on command line) with Azure Artifact Signing.
-# Multiples files can be provided as parameters on command line, to sign at once.
+# Multiple files can be provided as parameters on command line, to sign at once.
 # See README.md for more details.
 # -----------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@ There are multiple ways to sign Windows applications. In general, you want to
   (using signtool from Windows SDK, or jsign + osslsigncode, or a dedicated
   GitHub Action like SignPath).
 
-These script perform signing using the solution we chose for [Castle Game Engine](https://castle-engine.io/) distribution:
+These scripts perform signing using the solution we chose for [Castle Game Engine](https://castle-engine.io/) distribution:
 
 - _Azure Artifact Signing_ from Microsoft.
 
@@ -55,7 +55,7 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
 into `$AZURE_SIGNING_CLIENT_PARENT` directory.
 
 `sign_executable` signs executables (given on command line).
-Multiples files can be provided as parameters on command line, to sign at once.
+Multiple files can be provided as parameters on command line, to sign at once.
 Filenames are expected to be Windows executables (EXE, DLL, etc)
 with native paths (not Cygwin paths), absolute or relative.
 
@@ -71,7 +71,7 @@ we didn't need it for now.)
 
 Requirements:
 
-- SignTool from Windows SDK in `C:\ProgramFiles(x86)\Windows Kits\10\bin\10.*\x64\signtool.exe`
+- SignTool from Windows SDK in `C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe`
   (this is already installed in GHA runners)
 
 - Being logged-in to Azure, like by Azure CLI `az login`.
@@ -90,3 +90,5 @@ Requirements:
     "CertificateProfileName": "cge-sign-releases"
   }
   ```
+
+  The values visible in JSON above are not secret, no worries, you can just commit this JSON to public repo. The secret exchange happens during Azure Login, and even this can+should be _federated_ so a GitHub token is a key to Azure -- but explaining it is beyond the scope of this README:), follow Azure docs for that.
