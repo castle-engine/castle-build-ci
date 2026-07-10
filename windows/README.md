@@ -99,7 +99,7 @@ Requirements:
 - Additional environment variables provide metadata for signing.
   Must be synchronized with your Azure Artifact Signing configuration:
 
-    - `AZURE_ENDPOINT` - for example `plc.codesigning.azure.net`
+    - `AZURE_ENDPOINT` - for example `plc.codesigning.azure.net` (do _not_ include `https://` prefix)
     - `AZURE_CODESIGNING_ACCOUNT_NAME` - for example `cge-artifact-signer`
     - `AZURE_CERTIFICATE_PROFILE_NAME` - for example `cge-sign-releases`
 
