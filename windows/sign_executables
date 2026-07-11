@@ -12,10 +12,8 @@ set -euo pipefail
 # Adjust MSys2, in case this runs inside MSys2 (like in GitHub Actions runner).
 
 # Avoid MSys2 path conversion, as we pass parameters that look like Unix paths.
-# See https://github.com/castle-engine/castle-engine/blob/9520e3414e0e4653770e3ef0679f63e33c3ef6cb/.github/workflows/test-and-pack-runner-native.yml#L110
-# for more explanation what does MSys2 do any why it's *crazy* IMHO
-# (because it can be unexpected, breaks things in a weirdest way,
-# by mangling your parameters before they reach the called program).
+# See castle-engine/.github/workflows/use_cygpath_not_msys_automatic_conversions.md
+# for explanation.
 export MSYS2_ENV_CONV_EXCL='*'
 export MSYS2_ARG_CONV_EXCL='*'
 export MSYS_NO_PATHCONV=1
