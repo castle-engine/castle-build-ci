@@ -54,17 +54,17 @@ Note that _Azure Artifact Signing_ requires to be logged-in to Azure, like by Az
       "`castle-engine output executable-name`.exe"
 ```
 
-## Usage with `castle-engine pack`
+## Usage with `castle-engine package`
 
-If you use `castle-engine pack` to build a Windows release, you will have to split it.
+If you use `castle-engine package` to build a Windows release, you will have to split it.
 
 - Execute `castle-engine compile` first.
 - Then sign, as shown above.
-- Then execute `castle-engine pack --assume-compiled` to create the final release.
+- Then execute `castle-engine package --assume-compiled` to create the final release.
 
-The `castle-engine compile` + `castle-engine pack --assume-compiled` is guaranteed to produce the same result as `castle-engine pack` alone, but allows to sign in between.
+The `castle-engine compile` + `castle-engine package --assume-compiled` is guaranteed to produce the same result as `castle-engine package` alone, but allows to sign in between.
 
-TODO: It is possible we will introduce "post-processing" of the builds, one use-case of it would be to sign in the middle of `castle-engine pack`. Like `castle-engine pack --post-process-command -- bash -c .../windows/sign_executables`.
+TODO: It is possible we will introduce "post-processing" of the builds, one use-case of it would be to sign in the middle of `castle-engine package`. Like `castle-engine package --post-process-command -- bash -c .../windows/sign_executables`.
 
 ## Script documentation
 
