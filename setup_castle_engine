@@ -235,9 +235,13 @@ do_get_fpc()
   # Add macOS specific flags, see castle-fpc/README.md for reasons.
   # Otherwise, linking on newer macOS versions fails.
   if [[ "${OS}" = "darwin" ]]; then
-    # Even though we already checked we're on Darwin (source platform), 
-    # make sure we build *to* Darwin (target platform). As e.g. iOS doesn't accept -WMxxx parameter.
-    echo '#ifdef DARWIN' >> "${FPC_CFG}"
+
+    # Even though we already checked we're on Darwin (source platform),
+    # make sure we build *to* Darwin (target platform).
+    # As e.g. iOS doesn't accept -WMxxx parameter.
+    { echo '#ifdef DARWIN'
+      echo '#ifndef IOS'
+    } >> "${FPC_CFG}"
 
     MAC_SDK="$(xcrun --show-sdk-path)"
     MAC_XCODE="$(xcode-select --print-path)"
@@ -259,7 +263,9 @@ do_get_fpc()
     echo "SDK version is ${MAC_SDK_VERSION}, assuming it is >= 11.0"
     echo "-WM10.15" >> "${FPC_CFG}"
 
-    echo '#endif' >> "${FPC_CFG}"
+    { echo '#endif'
+      echo '#endif'
+    } >> "${FPC_CFG}"
   fi
 
   echo "Defined FPC config in ${FPC_CFG}:"
