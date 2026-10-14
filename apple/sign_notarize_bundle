@@ -82,6 +82,19 @@ check_codesign -d -vv --deep "${BUNDLE}"
 # but then we need to "staple" the app bundle (*not* zip),
 # and only later we can make proper release zip.
 
+# Run the command, retrying a few times in case of failure.
+# Communication with Apple servers sometimes fails because of temporary
+# network problems.
+retry()
+{
+  for ATTEMPT in 1 2 3; do
+    "$@" && return 0
+    echo "Command failed (attempt ${ATTEMPT}), retrying in 60 seconds: $1 $2"
+    sleep 60
+  done
+  "$@"
+}
+
 echo '-------------------------------'
 echo 'Notarizing the app bundle:'
 
@@ -91,7 +104,7 @@ echo 'Notarizing the app bundle:'
 # though we have to "staple" whole bundle.
 rm -f temp-notarize.zip
 zip -r temp-notarize.zip "${BUNDLE}/"
-xcrun notarytool submit temp-notarize.zip \
+retry xcrun notarytool submit temp-notarize.zip \
   --apple-id "$APPLE_ID" \
   --password "$APPLE_APP_PASSWORD" \
   --team-id "$APPLE_TEAM_ID" \
@@ -100,4 +113,4 @@ rm -f temp-notarize.zip
 
 echo '-------------------------------'
 echo 'Stapling the app bundle:'
-xcrun stapler staple "${BUNDLE}"
+retry xcrun stapler staple "${BUNDLE}"
