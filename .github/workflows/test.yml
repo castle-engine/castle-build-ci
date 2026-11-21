@@ -48,7 +48,7 @@ jobs:
             test_project/*.apk
           if-no-files-found: error
 
-  # Build on ARM runners (for Raspberry Pi) using pguyot/arm-runner-action .
+  # Build on ARM runners (for Raspberry Pi).
   build_arm_runner:
     name: Build on ARM Runner (for Raspberry Pi)
     runs-on: ubuntu-latest
@@ -58,12 +58,12 @@ jobs:
         include:
         # additional defines for Raspberry Pi 32-bit (Arm)
         - arch: raspberry-pi-32
-          # Arguments for pguyot/arm-runner-action
+          # Arguments for arm-runner-action
           cpu: cortex-a7
           base_image: raspios_lite:latest
         # additional defines for Raspberry Pi 64-bit (Aarch64)
         - arch: raspberry-pi-64
-          # Arguments for pguyot/arm-runner-action
+          # Arguments for arm-runner-action
           cpu: cortex-a53
           base_image: raspios_lite_arm64:latest
 
@@ -71,7 +71,7 @@ jobs:
       - name: Checkout app
         uses: actions/checkout@v7
 
-      - uses: pguyot/arm-runner-action@v2
+      - uses: castle-engine/arm-runner-action@castle-current
         with:
           base_image: ${{ matrix.base_image }}
           cpu: ${{ matrix.cpu }}
